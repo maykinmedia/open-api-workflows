@@ -92,7 +92,7 @@ jobs:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
           SECRET_KEY: ${{ inputs.django-settings-module }}
           DB_USER: ${{ inputs.db-user }}
-          DB_NAME: ${{ inuts.db-name }}
+          DB_NAME: ${{ inputs.db-name }}
           DB_PASSWORD: ${{ inputs.db-password }}
 
   oas-up-to-date:
