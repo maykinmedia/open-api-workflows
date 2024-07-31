@@ -58,9 +58,9 @@ jobs:
       - name: Run isort
         run: isort --check-only --diff ${{ inputs.isort-src-pattern }}
       - name: Run black
-        run: black --check --diff ${{ inputs.black-src-dirs }}
+        run: black --check --diff ${{ inputs.black-src-pattern }}
       - name: Run flake8
-        run: flake8 ${{ inputs.flake8-src-dirs }}
+        run: flake8 ${{ inputs.flake8-src-pattern }}
 
   migrations:
     name: Check for model changes not present in the migrations
