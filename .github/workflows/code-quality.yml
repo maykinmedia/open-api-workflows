@@ -103,13 +103,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: maykinmedia/setup-django-backend@v1.3
+      - name: Set up backend environment
+        uses: maykinmedia/setup-django-backend@v1.3
         with:
           apt-packages: ${{ inputs.apt-packages }}
           python-version: ${{ inputs.python-version }}
           setup-node: true
 
-      - name: Generate OAS files
+      - name: Check OAS files
         run: ./bin/check_schema.sh
         env:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
