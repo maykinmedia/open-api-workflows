@@ -11,6 +11,9 @@ on:
       node-version:
         required: true
         type: string
+      postgres-version:
+        required: true
+        type: string
 
       isort-src-pattern:
         required: true
@@ -68,7 +71,7 @@ jobs:
 
     services:
       postgres:
-        image: postgis/postgis:12-2.5 # TODO: retrieve from inputs
+        image: postgis/postgis:${{ inputs.postgres-version }}
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
         ports:
