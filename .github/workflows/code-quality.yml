@@ -44,7 +44,7 @@ on:
 
 jobs:
   formatting:
-    name: Run Isort
+    name: Check code formatting
     runs-on: ubuntu-latest
 
     steps:
