@@ -19,4 +19,4 @@ jobs:
       - name: Install dependencies
         run: npm install -g @openapitools/openapi-generator-cli
       - name: Run generate_sdks script
-        run: ./generate_sdks.sh
+        run: ./bin/generate_sdks.sh
