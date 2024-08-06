@@ -1,0 +1,21 @@
+on:
+  workflow_call:
+      node-version:
+        required: false
+        type: string
+        default: 'latest'
+
+jobs:
+  generate-sdks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+      - name: Install dependencies
+        run: npm install -g @openapitools/openapi-generator-cli
+      - name: Run generate_sdks script
+        run: ./generate_sdks.sh
