@@ -1,0 +1,140 @@
+on:
+  workflow_call:
+    inputs:
+      main-branch:
+        required: true
+        type: string
+        description: 'The name master/main branch'
+
+      docker-image-name:
+        required: true
+        type: string
+        description: 'Name for the docker image to be build'
+
+      python-version:
+        type: string
+        required: true
+
+      run-docs:
+        default: false
+        type: boolean
+        description: |
+          'Wether to build documentation or not, can be left empty when docs-ssl-conf is given.'
+
+      docs-ssl-conf:
+        required: false
+        type: string
+
+jobs:
+  changed-files:
+    runs-on: ubuntu-latest
+    name: Determine changed files
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get changed requirements files
+        id: changed-requirements
+        uses: tj-actions/changed-files@v44.5.7
+        with:
+          files: ^requirements/.+\.txt$
+
+    outputs:
+      changed-requirements: ${{ steps.changed-requirements.outputs.any_changed }}
+
+  check-requirements:
+    runs-on: ubuntu-latest
+    name: Check requirements files
+    if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: files
+        uses: tj-actions/changed-files@v44.5.7
+        with:
+          files: ^requirements/.+\.txt$
+
+      - name: Check requirements
+        run: bin/check_requirements.sh "${{ steps.files.outputs.modified_files }}"
+
+  docs:
+    runs-on: ubuntu-latest
+    name: Documentation build
+    if: ${{ inputs.run-docs || inputs.docs-ssl-conf }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: 'pip'
+          cache-dependency-path: 'requirements/*.txt'
+      - name: Install dependencies
+        run: pip install --requirement requirements/dev.txt pytest
+      - name: Build and test docs
+        env:
+          OPENSSL_CONF: ${{ inputs.docs-ssl-conf }}
+        run: |
+          pytest check_sphinx.py --verbose --tb=auto
+        working-directory: docs
+
+  docker-build:
+    runs-on: ubuntu-latest
+    name: Docker image build
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Determine tag/commit hash
+        id: vars
+        run: |
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name (if present at all)
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "${{ inputs.main-branch }}" ] && VERSION=latest
+
+          echo "tag=${VERSION}" >> $GITHUB_OUTPUT
+          echo "git_hash=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+      - name: Build the Docker image
+        run: |
+          docker build \
+            --tag ${{ inputs.docker-image-name }}:${{ steps.vars.outputs.tag }} \
+            --build-arg COMMIT_HASH=${{ steps.vars.outputs.git_hash }} \
+            --build-arg RELEASE=${{ steps.vars.outputs.tag }} \
+            .
+      - run: docker image save -o image.tar ${{ inputs.docker-image-name }}:${{ steps.vars.outputs.tag }}
+      - name: Store image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: image.tar
+          retention-days: 1
+
+  image_scan:
+    runs-on: ubuntu-latest
+    name: Scan docker image
+    needs:
+      - docker-build
+
+    steps:
+      - name: Download built image
+        uses: actions/download-artifact@v3
+        with:
+          name: docker-image
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          input: /github/workspace/image.tar  # from download-artifact
+          format: 'sarif'
+          output: 'trivy-results-docker.sarif'
+          ignore-unfixed: true
+      - name: Upload results to GH Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results-docker.sarif'
