@@ -6,6 +6,7 @@ repositories.
 ## Usage
 
 ```yaml
+# ci.yml
 jobs:
   stuff:
     run: ...
@@ -15,6 +16,31 @@ jobs:
     with:
       main-branch: 'main'
       python-version: '3.11'
+
+  some-other-stuff:
+    run: ...
+```
+
+```yaml
+# code-quality.yml
+jobs:
+  stuff:
+    run: ...
+
+  open-api-code-quality:
+    uses: maykinmedia/open-api-workflows/.github/workflows/code-quality.yml@main
+    with:
+      apt-packages: 'libgdal-dev gdal-bin'
+      python-version: '3.11'
+      node-version: '18'
+      postgres-version: '12-2.5'
+
+      isort-src-pattern: 'src'
+      black-src-pattern: 'src docs'
+      flake8-src-pattern: 'src'
+
+      django-settings-module: 'project.conf.ci'
+      django-secret-key: dummy
 
   some-other-stuff:
     run: ...
