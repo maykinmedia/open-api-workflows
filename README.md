@@ -6,11 +6,18 @@ repositories.
 ## Usage
 
 ```yaml
+jobs:
+  stuff:
+    run: ...
+
   open-api-ci:
     uses: maykinmedia/open-api-workflows/.github/workflows/ci.yml@main
     with:
       main-branch: 'main'
       python-version: '3.11'
+
+  some-other-stuff:
+    run: ...
 ```
 
 Note that for some workflows, a script is expected to be present in the repository:
