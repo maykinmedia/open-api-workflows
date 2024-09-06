@@ -15,7 +15,7 @@ on:
         type: string
         description: 'Name for the docker image to be build'
 
-      repositor-owner:
+      repository-owner:
         required: true
         type: string
         description: |
