@@ -147,7 +147,7 @@ jobs:
 
   publish:
     needs:
-      - docker
+      - docker-build
 
     name: Push Docker image
     runs-on: ubuntu-latest
