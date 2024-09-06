@@ -6,14 +6,20 @@ on:
         type: string
         description: 'The name master/main branch'
 
+      python-version:
+        type: string
+        required: true
+
       docker-image-name:
         required: true
         type: string
         description: 'Name for the docker image to be build'
 
-      python-version:
-        type: string
+      repositor-owner:
         required: true
+        type: string
+        description: |
+          'Name of the repository owner. Used when determining wether to publish or not '
 
       run-docs:
         default: false
@@ -46,7 +52,7 @@ jobs:
   check-requirements:
     runs-on: ubuntu-latest
     name: Check requirements files
-    if: ${{ ! startsWith(github.ref, 'refs/tags/') }}
+    if: ${{ ! github.ref_type == 'tag' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -138,3 +144,45 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results-docker.sarif'
+
+  publish:
+    needs:
+      - docker
+
+    name: Push Docker image
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push'
+      && github.repository_owner == ${{ inputs.repository-owner }}
+      && github.ref_type == 'tag'
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download built image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+
+      - name: Determine tag/commit hash
+        id: vars
+        run: |
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name (if present at all)
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "main" ] && VERSION=latest
+
+          echo "tag=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Load image
+        run: |
+          docker image load -i image.tar
+
+      - name: Log into registry
+        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Push the Docker image
+        run: docker push $IMAGE_NAME:${{ steps.vars.outputs.tag }}
