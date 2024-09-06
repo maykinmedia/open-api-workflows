@@ -54,7 +54,7 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     name: Documentation build
-    if: ${{ inputs.run-docs || env.OPENSSL_CONF }}
+    if: ${{ inputs.run-docs || env.SPHINX_SSL_CONF }}
 
     steps:
       - uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
         run: pip install --requirement requirements/dev.txt pytest
       - name: Build and test docs
         env:
-          OPENSSL_CONF: ${{ env.OPENSSL_CONF }}
+          OPENSSL_CONF: ${{ env.SPHINX_SSL_CONF }}
         run: |
           pytest check_sphinx.py --verbose --tb=auto
         working-directory: docs
