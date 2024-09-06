@@ -6,11 +6,6 @@ on:
         type: string
         description: 'The name master/main branch'
 
-      docker-image-name:
-        required: true
-        type: string
-        description: 'Name for the docker image to be build'
-
       python-version:
         type: string
         required: true
@@ -20,10 +15,6 @@ on:
         type: boolean
         description: |
           'Wether to build documentation or not, can be left empty when docs-ssl-conf is given.'
-
-      docs-ssl-conf:
-        required: false
-        type: string
 
 jobs:
   changed-files:
@@ -76,7 +67,7 @@ jobs:
         run: pip install --requirement requirements/dev.txt pytest
       - name: Build and test docs
         env:
-          OPENSSL_CONF: ${{ inputs.docs-ssl-conf }}
+          OPENSSL_CONF: ${{ env.OPENSSL_CONF }}
         run: |
           pytest check_sphinx.py --verbose --tb=auto
         working-directory: docs
@@ -84,6 +75,7 @@ jobs:
   docker-build:
     runs-on: ubuntu-latest
     name: Docker image build
+    if: ${{ env.IMAGE_NAME }}
 
     steps:
       - uses: actions/checkout@v4
