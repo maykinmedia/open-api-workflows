@@ -17,6 +17,7 @@ jobs:
       main-branch: 'main'
       python-version: '3.11'
       docker-image-name: 'repo-owner/repo-name'
+      repository-owner: 'repo-owner'
 
   some-other-stuff:
     run: ...
