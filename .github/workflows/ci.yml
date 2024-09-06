@@ -54,7 +54,7 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     name: Documentation build
-    if: ${{ inputs.run-docs || inputs.docs-ssl-conf }}
+    if: ${{ inputs.run-docs || env.OPENSSL_CONF }}
 
     steps:
       - uses: actions/checkout@v4
