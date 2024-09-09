@@ -52,7 +52,7 @@ jobs:
   check-requirements:
     runs-on: ubuntu-latest
     name: Check requirements files
-    if: ${{ ! github.ref_type == 'tag' }}
+    if: github.ref_type == 'branch'
 
     steps:
       - uses: actions/checkout@v4
@@ -145,13 +145,14 @@ jobs:
         with:
           sarif_file: 'trivy-results-docker.sarif'
 
+  # TODO: reuse secrets from calling workflow (see login step)
   publish:
     needs:
       - docker-build
 
     name: Push Docker image
     runs-on: ubuntu-latest
-    if: |
+    if: >
       github.event_name == 'push'
       && github.repository_owner == ${{ inputs.repository-owner }}
       && github.ref_type == 'tag'
