@@ -42,9 +42,9 @@ jobs:
 
       - name: Get changed requirements files
         id: changed-requirements
-        uses: tj-actions/changed-files@v44.5.7
+        uses: tj-actions/changed-files@v45
         with:
-          files: ^requirements/.+\.txt$
+          files: requirements/*.txt
 
     outputs:
       changed-requirements: ${{ steps.changed-requirements.outputs.any_changed }}
@@ -59,9 +59,9 @@ jobs:
         with:
           fetch-depth: 2
       - id: files
-        uses: tj-actions/changed-files@v44.5.7
+        uses: tj-actions/changed-files@v45
         with:
-          files: ^requirements/.+\.txt$
+          files: requirements/*.txt
 
       - name: Check requirements
         run: bin/check_requirements.sh "${{ steps.files.outputs.modified_files }}"
