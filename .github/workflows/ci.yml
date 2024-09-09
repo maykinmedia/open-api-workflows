@@ -153,9 +153,9 @@ jobs:
     name: Push Docker image
     runs-on: ubuntu-latest
     if: >
-      github.event_name == 'push'
-      && github.repository_owner == ${{ inputs.repository-owner }}
-      && github.ref_type == 'tag'
+      github.event_name == 'push' &&
+      github.repository_owner == ${{ inputs.repository-owner }} &&
+      github.ref_type == 'tag'
 
     steps:
       - uses: actions/checkout@v4
