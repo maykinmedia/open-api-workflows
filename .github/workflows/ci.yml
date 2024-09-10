@@ -46,16 +46,15 @@ jobs:
         with:
           files: requirements/*.txt
 
+      - run: echo ${{ steps.files.outputs.modified_files }}
+
       - name: Check requirements
         if: >
-          ${{
-            ! contains(steps.files.outputs.modified_files, 'requirements/base.txt') &&
-            (
-              contains(steps.files.outputs.modified_files, 'requirements/ci.txt') ||
-              contains(steps.files.outputs.modified_files, 'requirements/dev.txt')
-            )
-          }}
-
+          contains(steps.files.outputs.modified_files, 'requirements/base.txt') &&
+          (
+            ! contains(steps.files.outputs.modified_files, 'requirements/ci.txt') ||
+            ! contains(steps.files.outputs.modified_files, 'requirements/dev.txt')
+          )
         run: |
           echo "'requirements/base.txt' was changed, but 'requirements/ci.txt' or 'requirements/dev.txt' were not."
           echo "Please update the requirements using ./bin/compile_dependencies.sh"
