@@ -32,23 +32,6 @@ on:
         type: string
 
 jobs:
-  changed-files:
-    runs-on: ubuntu-latest
-    name: Determine changed files
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
-
-      - name: Get changed requirements files
-        id: changed-requirements
-        uses: tj-actions/changed-files@v45
-        with:
-          files: requirements/*.txt
-
-    outputs:
-      changed-requirements: ${{ steps.changed-requirements.outputs.any_changed }}
-
   check-requirements:
     runs-on: ubuntu-latest
     name: Check requirements files
@@ -64,7 +47,18 @@ jobs:
           files: requirements/*.txt
 
       - name: Check requirements
-        run: bin/check_requirements.sh "${{ steps.files.outputs.modified_files }}"
+        if: >
+          ${{
+            ! contains(steps.files.outputs.modified_files, 'requiments/base.txt') &&
+            (
+              contains(steps.files.outputs.modified_files, 'requiments/ci.txt') ||
+              contains(steps.files.outputs.modified_files, 'requiments/dev.txt')
+            )
+          }}
+        run: |
+          echo "'requirements/base.txt' was changed, but 'requirements/ci.txt' or 'requirements/dev.txt' were not."
+          echo "Please update the requirements using ./bin/compile_dependencies.sh"
+          exit 1
 
   docs:
     runs-on: ubuntu-latest
