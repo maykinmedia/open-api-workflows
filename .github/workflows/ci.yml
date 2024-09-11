@@ -46,8 +46,6 @@ jobs:
         with:
           files: requirements/*.txt
 
-      - run: echo ${{ steps.files.outputs.modified_files }}
-
       - name: Check requirements
         if: >
           contains(steps.files.outputs.modified_files, 'requirements/base.txt') &&
