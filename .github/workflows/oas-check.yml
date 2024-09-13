@@ -10,61 +10,28 @@ on:
         type: string
 
       schema-command:
-        required: true
         type: string
         description: 'The command which will be used to generate the OAS file(s)'
+        default: 'spectacular'
+
       schema-options:
-        required: true
         type: string
         description: 'The options passed to the `schema-command`'
+        default: ''
 
-      # Used for projects with the following OAS layout:
-      # - src/<project-name>/api/openapi.yaml (Referentielijsten)
-      # - src/<project-name>/openapi.yaml (Open-Notificaties)
       schema-path:
         required: true
         type: string
-        description: >
-          'Directory where the OAS is located (without trailing slash).'
-          'This can be a template string when a project has a nested layout.'
-
-      # Used for projects with the following OAS layout:
-      # - src/<project-name>/components/<component>/openapi.yaml (Open-Zaak)
-      # - src/<project-name>/api/<version>/openapi.yaml (Objecttypes-API)
-      schema-item:
-        required: false
-        type: string
-        description: >
-          'The name of the item of the OAS file being processed. Should'
-          'be used in conjuction with `schema-path`.'
+        description: 'Location of the OAS file'
 
       apt-packages:
         required: false
         type: string
 
 jobs:
-  schema-path:
-    runs-on: ubuntu-latest
-    outputs:
-      path: >
-        ${{ steps.nested-layout.outputs.path || steps.flat-layout.outputs.path }}
-    steps:
-      - name: Output nested layout schema path
-        if: inputs.schema-item
-        id: nested-layout
-        run: |
-          echo \
-          "path=${{ format('{0}/{1}/openapi.yaml', inputs.schema-path, inputs.schema-item) }}/openapi.yaml" \
-          >> "$GITHUB_OUTPUT"
-      - name: Output flat layout schema path
-        if: ${{ ! inputs.schema-item }}
-        id: flat-layout
-        run: echo "path=${{ inputs.schema-path }}/openapi.yaml" >> "$GITHUB_OUTPUT"
-
   oas-up-to-date:
     name: Check for unexepected OAS changes
     runs-on: ubuntu-latest
-    needs: ['schema-path']
     steps:
       - uses: actions/checkout@v4
       - name: Set up backend environment
@@ -74,19 +41,23 @@ jobs:
           python-version: ${{ inputs.python-version }}
           setup-node: true
 
+      - name: Generate an UUID for the OAS file
+        id: uuid
+        run: echo "uuid=$(uuidgen)" >> "$GITHUB_OUTPUT"
+
+      - name: Set the path for the newly generated OAS file
+        id: path
+        run: >
+          echo "path=${{ github.workspace }}/openapi-${{ steps.uuid.outputs.uuid }}.yaml" >> "$GITHUB_OUTPUT"
+
       - name: Generate OAS file
-        if: ${{ ! inputs.schema-item }}
         run: |
           src/manage.py ${{ inputs.schema-command }} \
           ${{ inputs.schema-options }} \
-          --file "${{ github.workspace }}/openapi.yaml" \
+          --file "${{ steps.path.outputs.path }}" \
           --validate
         env:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
 
-      - name: Compare OAS file
-        if: ${{ ! inputs.schema-item }}
-        run: |
-          cmp --silent \
-          ${{ github.workspace }}/openapi.yml \
-          ${{ needs.schema-path.outputs.path }}
+      - name: Compare OAS files
+        run: cmp --silent ${{ steps.path.outputs.path }} ${{ inputs.schema-path }}

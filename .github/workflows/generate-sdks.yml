@@ -9,37 +9,10 @@ on:
       schema-path:
         required: true
         type: string
-        description: >
-          'Directory where the OAS is located (without trailing slash).'
-          'This can be a template string when a project has a nested layout.'
-      schema-item:
-        required: false
-        type: string
-        description: >
-          'The name of the item of the OAS file being processed. Should'
-          'be used in conjuction with `schema-path`.'
+        description: 'Location of the OAS file'
 
 jobs:
-  schema-path:
-    runs-on: ubuntu-latest
-    outputs:
-      path: >
-        ${{ steps.nested-layout.outputs.path || steps.flat-layout.outputs.path }}
-    steps:
-      - name: Output nested layout schema path
-        if: inputs.schema-item
-        id: nested-layout
-        run: |
-          echo \
-          "path=${{ format('{0}/{1}/openapi.yaml', inputs.schema-path, inputs.schema-item) }}/openapi.yaml" \
-          >> "$GITHUB_OUTPUT"
-      - name: Output flat layout schema path
-        if: ${{ ! inputs.schema-item }}
-        id: flat-layout
-        run: echo "path=${{ inputs.schema-path }}/openapi.yaml" >> "$GITHUB_OUTPUT"
-
   generate-sdks:
-    needs: ['schema-path']
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -53,12 +26,12 @@ jobs:
       - name: Validate OAS file
         run: |
           openapi-generator-cli validate \
-          --input-spec ${{ needs.schema-path.outputs.path }}
+          --input-spec ${{ inputs.schema-path }}
 
       - name: Generate Java client
         run: |
           openapi-generator-cli generate \
-          --input-spec ${{ needs.schema-path.outputs.path }} \
+          --input-spec ${{ inputs.schema-path }} \
           --generator-name java \
           --output ./sdks/java \
           --global-property=modelTests=false,apiTests=false,modelDocs=false,apiDocs=false \
@@ -67,7 +40,7 @@ jobs:
       - name: Generate .NET client
         run: |
           openapi-generator-cli generate \
-          --input-spec ${{ needs.schema-path.outputs.path }} \
+          --input-spec ${{ inputs.schema-path }} \
           --output ./sdks/net \
           --generator-name csharp \
           --global-property=modelTests=false,apiTests=false,modelDocs=false,apiDocs=false \
@@ -76,7 +49,7 @@ jobs:
       - name: Generate Python client
         run: |
           openapi-generator-cli generate \
-          --input-spec ${{ needs.schema-path.outputs.path }} \
+          --input-spec ${{ inputs.schema-path }} \
           --output ./sdks/python \
           --generator-name python \
           --global-property=modelTests=false,apiTests=false,modelDocs=false,apiDocs=false \
