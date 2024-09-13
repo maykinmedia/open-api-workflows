@@ -16,14 +16,14 @@ on:
         type: string
 
       isort-src-pattern:
-        required: true
         type: string
+        default: 'src'
       black-src-pattern:
-        required: true
         type: string
+        default: 'src docs'
       flake8-src-pattern:
-        required: true
         type: string
+        default: 'src'
 
       django-settings-module:
         required: true
