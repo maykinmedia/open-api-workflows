@@ -31,6 +31,13 @@ on:
         required: false
         type: string
 
+    secrets:
+      docker-username:
+        required: true
+
+      docker-token:
+        required: true
+
 jobs:
   check-requirements:
     runs-on: ubuntu-latest
@@ -137,7 +144,6 @@ jobs:
         with:
           sarif_file: 'trivy-results-docker.sarif'
 
-  # TODO: reuse secrets from calling workflow (see login step)
   publish:
     needs:
       - docker-build
@@ -175,7 +181,7 @@ jobs:
           docker image load -i image.tar
 
       - name: Log into registry
-        run: echo "${{ secrets.DOCKER_TOKEN }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        run: echo "${{ secrets.docker-token }}" | docker login -u ${{ secrets.docker-username }} --password-stdin
 
       - name: Push the Docker image
         run: docker push $IMAGE_NAME:${{ steps.vars.outputs.tag }}
