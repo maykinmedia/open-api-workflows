@@ -6,10 +6,41 @@ on:
         type: string
         default: 'latest'
 
-jobs:
-  generate-sdks:
-    runs-on: ubuntu-latest
+      schema-path:
+        required: true
+        type: string
+        description: >
+          'Directory where the OAS is located (without trailing slash).'
+          'This can be a template string when a project has a nested layout.'
+      schema-item:
+        required: false
+        type: string
+        description: >
+          'The name of the item of the OAS file being processed. Should'
+          'be used in conjuction with `schema-path`.'
 
+jobs:
+  schema-path:
+    runs-on: ubuntu-latest
+    outputs:
+      path: >
+        ${{ steps.nested-layout.outputs.path || steps.flat-layout.outputs.path }}
+    steps:
+      - name: Output nested layout schema path
+        if: inputs.schema-item
+        id: nested-layout
+        run: |
+          echo \
+          "path=${{ format('{0}/{1}/openapi.yaml', inputs.schema-path, inputs.schema-item) }}/openapi.yaml" \
+          >> "$GITHUB_OUTPUT"
+      - name: Output flat layout schema path
+        if: ${{ ! inputs.schema-item }}
+        id: flat-layout
+        run: echo "path=${{ inputs.schema-path }}/openapi.yaml" >> "$GITHUB_OUTPUT"
+
+  generate-sdks:
+    needs: ['schema-path']
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -18,5 +49,35 @@ jobs:
           node-version: ${{ inputs.node-version }}
       - name: Install dependencies
         run: npm install --global @openapitools/openapi-generator-cli
-      - name: Run generate_sdks script
-        run: ./bin/generate_sdks.sh
+
+      - name: Validate OAS file
+        run: |
+          openapi-generator-cli validate \
+          --input-spec ${{ needs.schema-path.outputs.path }}
+
+      - name: Generate Java client
+        run: |
+          openapi-generator-cli generate \
+          --input-spec ${{ needs.schema-path.outputs.path }} \
+          --generator-name java \
+          --output ./sdks/java \
+          --global-property=modelTests=false,apiTests=false,modelDocs=false,apiDocs=false \
+          --additional-properties=dateLibrary=java8,java8=true,optionalProjectFile=false,optionalAssemblyInfo=false
+
+      - name: Generate .NET client
+        run: |
+          openapi-generator-cli generate \
+          --input-spec ${{ needs.schema-path.outputs.path }} \
+          --output ./sdks/net \
+          --generator-name csharp \
+          --global-property=modelTests=false,apiTests=false,modelDocs=false,apiDocs=false \
+          --additional-properties=optionalProjectFile=false,optionalAssemblyInfo=false
+
+      - name: Generate Python client
+        run: |
+          openapi-generator-cli generate \
+          --input-spec ${{ needs.schema-path.outputs.path }} \
+          --output ./sdks/python \
+          --generator-name python \
+          --global-property=modelTests=false,apiTests=false,modelDocs=false,apiDocs=false \
+          --additional-properties=optionalProjectFile=false,optionalAssemblyInfo=false+
