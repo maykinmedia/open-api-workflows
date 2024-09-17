@@ -11,8 +11,9 @@ on:
       node-version:
         required: true
         type: string
-      postgres-version:
-        required: true
+
+      postgres-image:
+        default: 'postgres:latest'
         type: string
 
       isort-src-pattern:
@@ -71,7 +72,7 @@ jobs:
 
     services:
       postgres:
-        image: postgis/postgis:${{ inputs.postgres-version }}
+        image: ${{ inputs.postgres-image }}
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
         ports:
