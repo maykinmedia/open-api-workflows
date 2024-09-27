@@ -17,7 +17,6 @@ jobs:
       main-branch: 'main'
       python-version: '3.11'
       docker-image-name: 'repo-owner/repo-name'
-      repository-owner: 'repo-owner'
 
   some-other-stuff:
     run: ...
@@ -36,10 +35,6 @@ jobs:
       python-version: '3.11'
       node-version: '18'
       postgres-version: '12-2.5'
-
-      isort-src-pattern: 'src'
-      black-src-pattern: 'src docs'
-      flake8-src-pattern: 'src'
 
       django-settings-module: 'project.conf.ci'
       django-secret-key: dummy
