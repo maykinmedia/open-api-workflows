@@ -1,5 +1,6 @@
 # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning
 
+name: open-api-workflow code-analysis
 on:
   workflow_call:
 

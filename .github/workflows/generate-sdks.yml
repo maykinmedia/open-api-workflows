@@ -1,3 +1,4 @@
+name: open-api-workflow generate-sdks
 on:
   workflow_call:
     inputs:
