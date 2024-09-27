@@ -1,3 +1,4 @@
+name: open-api-workflow ci
 on:
   workflow_call:
     inputs:
@@ -15,12 +16,6 @@ on:
         type: string
         description: 'Name for the docker image to be build'
 
-      repository-owner:
-        required: true
-        type: string
-        description: |
-          'Name of the repository owner. Used when determining wether to publish or not '
-
       run-docs:
         default: false
         type: boolean
@@ -30,13 +25,6 @@ on:
       docs-ssl-conf:
         required: false
         type: string
-
-    secrets:
-      docker-username:
-        required: true
-
-      docker-token:
-        required: true
 
 jobs:
   check-requirements:
@@ -144,44 +132,3 @@ jobs:
         with:
           sarif_file: 'trivy-results-docker.sarif'
 
-  publish:
-    needs:
-      - docker-build
-
-    name: Push Docker image
-    runs-on: ubuntu-latest
-    if: >
-        github.event_name == 'push' &&
-        github.repository_owner == inputs.repository-owner &&
-        github.ref_type == 'tag'
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Download built image
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-image
-
-      - name: Determine tag/commit hash
-        id: vars
-        run: |
-          # Strip git ref prefix from version
-          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-          # Strip "v" prefix from tag name (if present at all)
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
-
-          echo "tag=${VERSION}" >> $GITHUB_OUTPUT
-
-      - name: Load image
-        run: |
-          docker image load -i image.tar
-
-      - name: Log into registry
-        run: echo "${{ secrets.docker-token }}" | docker login -u ${{ secrets.docker-username }} --password-stdin
-
-      - name: Push the Docker image
-        run: docker push ${{{ inputs.docker-image-name }}:${{ steps.vars.outputs.tag }}
