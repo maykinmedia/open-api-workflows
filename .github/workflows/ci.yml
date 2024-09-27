@@ -184,4 +184,4 @@ jobs:
         run: echo "${{ secrets.docker-token }}" | docker login -u ${{ secrets.docker-username }} --password-stdin
 
       - name: Push the Docker image
-        run: docker push $IMAGE_NAME:${{ steps.vars.outputs.tag }}
+        run: docker push ${{{ inputs.docker-image-name }}:${{ steps.vars.outputs.tag }}
