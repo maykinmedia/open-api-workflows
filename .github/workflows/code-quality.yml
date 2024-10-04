@@ -1,0 +1,101 @@
+name: open-api-workflow code-quality
+on:
+  workflow_call:
+    inputs:
+      apt-packages:
+        required: false
+        type: string
+
+      python-version:
+        required: true
+        type: string
+      node-version:
+        required: true
+        type: string
+
+      postgres-image:
+        default: 'postgres:latest'
+        type: string
+
+      isort-src-pattern:
+        type: string
+        default: 'src'
+      black-src-pattern:
+        type: string
+        default: 'src docs'
+      flake8-src-pattern:
+        type: string
+        default: 'src'
+
+      django-settings-module:
+        required: true
+        type: string
+      django-secret-key:
+        required: false
+        type: string
+
+      db-name:
+        required: false
+        type: string
+        default: 'postgres'
+      db-user:
+        required: false
+        type: string
+        default: 'postgres'
+      db-password:
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  formatting:
+    name: Check code formatting
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up backend environment
+        uses: maykinmedia/setup-django-backend@v1.3
+        with:
+          apt-packages: ${{ inputs.apt-packages }}
+          python-version: ${{ inputs.python-version }}
+          setup-node: false
+      - name: Run isort
+        run: isort --check-only --diff ${{ inputs.isort-src-pattern }}
+      - name: Run black
+        run: black --check --diff ${{ inputs.black-src-pattern }}
+      - name: Run flake8
+        run: flake8 ${{ inputs.flake8-src-pattern }}
+
+  migrations:
+    name: Check for model changes not present in the migrations
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: ${{ inputs.postgres-image }}
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        # Needed because the postgres container does not provide a healthcheck
+        options:
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up backend environment
+        uses: maykinmedia/setup-django-backend@v1.3
+        with:
+          apt-packages: ${{ inputs.apt-packages }}
+          python-version: ${{ inputs.python-version }}
+          setup-node: false
+
+      - name: Check for missing migrations
+        run: src/manage.py makemigrations --check --dry-run
+        env:
+          DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
+          SECRET_KEY: ${{ inputs.django-settings-module }}
+          DB_USER: ${{ inputs.db-user }}
+          DB_NAME: ${{ inputs.db-name }}
+          DB_PASSWORD: ${{ inputs.db-password }}

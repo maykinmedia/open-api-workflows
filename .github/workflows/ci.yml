@@ -1,0 +1,110 @@
+name: open-api-workflow ci
+on:
+  workflow_call:
+    inputs:
+      main-branch:
+        required: true
+        type: string
+        description: 'The name master/main branch'
+
+      python-version:
+        type: string
+        required: true
+
+      docker-image-name:
+        required: true
+        type: string
+        description: 'Name for the docker image to be build'
+
+      run-docs:
+        default: false
+        type: boolean
+        description: |
+          'Wether to build documentation or not, can be left empty when docs-ssl-conf is given.'
+
+      docs-ssl-conf:
+        required: false
+        type: string
+
+jobs:
+  check-requirements:
+    runs-on: ubuntu-latest
+    name: Check requirements files
+    if: github.ref_type == 'branch'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: requirements/*.txt
+
+      - name: Check requirements
+        if: >
+          contains(steps.files.outputs.modified_files, 'requirements/base.txt') &&
+          (
+            ! contains(steps.files.outputs.modified_files, 'requirements/ci.txt') ||
+            ! contains(steps.files.outputs.modified_files, 'requirements/dev.txt')
+          )
+        run: |
+          echo "'requirements/base.txt' was changed, but 'requirements/ci.txt' or 'requirements/dev.txt' were not."
+          echo "Please update the requirements using ./bin/compile_dependencies.sh"
+          exit 1
+
+  docs:
+    runs-on: ubuntu-latest
+    name: Documentation build
+    if: ${{ inputs.run-docs || inputs.docs-ssl-conf }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: 'pip'
+          cache-dependency-path: 'requirements/*.txt'
+      - name: Install dependencies
+        run: pip install --requirement requirements/ci.txt
+      - name: Build and test docs
+        env:
+          OPENSSL_CONF: ${{ inputs.docs-ssl-conf }}
+        run: |
+          pytest check_sphinx.py --verbose --tb=auto
+        working-directory: docs
+
+  docker-build:
+    runs-on: ubuntu-latest
+    name: Docker image build
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Determine tag/commit hash
+        id: vars
+        run: |
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name (if present at all)
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "${{ inputs.main-branch }}" ] && VERSION=latest
+
+          echo "tag=${VERSION}" >> $GITHUB_OUTPUT
+          echo "git_hash=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+      - name: Build the Docker image
+        run: |
+          docker build \
+            --tag ${{ inputs.docker-image-name }}:${{ steps.vars.outputs.tag }} \
+            --build-arg COMMIT_HASH=${{ steps.vars.outputs.git_hash }} \
+            --build-arg RELEASE=${{ steps.vars.outputs.tag }} \
+            .
+      - run: docker image save -o image.tar ${{ inputs.docker-image-name }}:${{ steps.vars.outputs.tag }}
+      - name: Store image artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image
+          path: image.tar
+          retention-days: 1
