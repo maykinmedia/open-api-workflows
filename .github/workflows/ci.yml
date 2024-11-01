@@ -137,6 +137,10 @@ jobs:
           format: 'sarif'
           output: 'trivy-results-docker.sarif'
           ignore-unfixed: true
+        env:
+          # Uses the cache from trivy-db-cache.yml workflow
+          TRIVY_SKIP_DB_UPDATE: true
+          TRIVY_SKIP_JAVA_DB_UPDATE: true
 
       - name: Upload results to GH Security tab
         uses: github/codeql-action/upload-sarif@v3
