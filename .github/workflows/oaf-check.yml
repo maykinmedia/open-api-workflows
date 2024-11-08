@@ -11,18 +11,101 @@ jobs:
   oaf-up-to-date:
     name: Check for new OAF version
     runs-on: ubuntu-latest
-
+    outputs:
+      OAF_VERSION: ${{ steps.save-oaf-version.outputs.OAF_VERSION }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ inputs.python-version }}
           cache: 'pip'
-          cache-dependency-path: 'requirements/dev.txt'
+          cache-dependency-path: 'requirements/*.txt'
+      - name: Install dependencies
+        run: pip install $(grep "pip-tools==" requirements/dev.txt)
+      - name: Run compile dependencies
+        run: ./bin/compile_dependencies.sh --upgrade-package open-api-framework
+      - name: Check git diff
+        run: git diff --exit-code -- requirements/*.txt
+      - name: Save OAF Version
+        # save the package version for branch names and commit messages
+        if: failure()
+        id: save-oaf-version
+        run: echo "OAF_VERSION=$(grep -Po '(?<=open-api-framework==)[^\n]*' requirements/dev.txt)" >> $GITHUB_OUTPUT
+
+  create-oaf-update-pr:
+    name: Create a pull requests to update OAF
+    runs-on: ubuntu-latest
+    needs: [oaf-up-to-date]
+    # only run if not up to date and version is provided
+    if: failure()
+    env:
+      OAF_VERSION: ${{needs.oaf-up-to-date.outputs.OAF_VERSION}}
+      OAF_BRANCH: update/open-api-framework-${{needs.oaf-up-to-date.outputs.OAF_VERSION}}
+      ACTION_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+    steps:
+      # Setup Git
+      - uses: actions/checkout@v4
+      - name: Set up Git credentials
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+      - name: Checkout or Create Branch
+        # Checkout of create new branch if it already exists
+        run: |
+          git fetch
+          git switch $OAF_BRANCH || \
+          git switch -c $OAF_BRANCH
+
+      - name: Rebase main branch
+        # Rebase onto latest target branch. Step fails if conflicts exist
+        # Reset branch to target branch if rebase fails
+        run: |
+          git rebase ${{github.ref_name}} $OAF_BRANCH || (
+          (git rebase --abort || true) &&
+          git reset --hard ${{github.ref_name}} )
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: 'pip'
+          cache-dependency-path: 'requirements/*.txt'
       - name: Install dependencies
         run: pip install $(grep "pip-tools==" requirements/dev.txt)
       - name: Run compile dependencies
         run: ./bin/compile_dependencies.sh --upgrade-package open-api-framework
 
-      - name: Check git diff
-        run: git diff --exit-code -- requirements/*.txt
+      - name: Detect if changes need to be made
+        # Negate gif diff - returns 1 if changes, 0 if none ==>  0, 1
+        run: "! git diff --exit-code -- requirements/*.txt"
+
+      - name: Commit Changes
+        run: "git commit -i requirements/*.txt -m ':arrow_up: Update Open-API-Framework to ${{env.OAF_VERSION}}'"
+      - name: Push Changes
+        run: git push -f --set-upstream origin $OAF_BRANCH
+
+      # GitHub
+      - name: Check for Existing PR
+        id: existing-pr
+        # list open branches in json format and check for title key
+        run: |
+          if [[ $(gh pr list --json title | grep '\"title\"') ]]; then
+            echo "EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "EXISTS=false" >> $GITHUB_ENV
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Create New PR
+        if: ${{! env.EXISTS}}
+        run: |
+          gh pr create -B ${{github.ref_name}} \
+          --title "Update Open API Framework to ${{env.OAF_VERSION}}" \
+          --body "Generated with github action [${{ github.run_id }}]($ACTION_URL)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Update Existing PR
+        if: ${{env.EXISTS}}
+        run: gh pr comment $OAF_BRANCH --body "Updated by github action [${{ github.run_id }}]($ACTION_URL)"
+        env:
+          GH_TOKEN: ${{ github.token }}
