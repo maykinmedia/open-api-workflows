@@ -29,10 +29,8 @@ fi
 git fetch
 
 # Create Branch
-echo "Creating a Branch"
+git stash
 git switch "$BRANCH_NAME" || git switch -c "$BRANCH_NAME"
-git reset "$BASE_BRANCH"
-
 
 # Push if Update
 if ! [[ $(git ls-remote --exit-code --heads origin refs/heads/"$BRANCH_NAME") &&  $(git diff --exit-code "$BRANCH_NAME" origin/"$BRANCH_NAME") ]]; then
