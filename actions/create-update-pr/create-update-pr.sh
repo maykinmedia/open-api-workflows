@@ -30,19 +30,41 @@ git fetch
 
 # Force Create Branch
 git switch -C "$BRANCH_NAME"
+echo "" # newline
 
+echo "Show Status:"
+git status
+echo "" # newline
 
-# Push if Update
-if ! [[ $(git ls-remote --exit-code --heads origin refs/heads/"$BRANCH_NAME") &&  $(git diff --exit-code "$BRANCH_NAME" origin/"$BRANCH_NAME") ]]; then
-    echo "Changes detected. Creating commit and pushing."
-    git commit -a -m "$COMMIT_MESSAGE"
+echo "Commit Any Changes"
+if ! git diff --exit-code --quiet
+then
+    echo "Commiting Files"
+    git add -A
+    git commit -m "$COMMIT_MESSAGE"
+else
+    echo "No files to commit"
+fi
+echo "" # newline
+
+echo "Check if Changes have been made"
+if ! git ls-remote --exit-code --quiet --heads origin refs/heads/"$BRANCH_NAME"
+then
+    echo "No Remote Found, creating"
+    git push --set-upstream origin "$BRANCH_NAME"
+
+elif ! git diff --exit-code --quiet "$BRANCH_NAME"..origin/"$BRANCH_NAME"
+then
+    echo "Changes detected between local and remote. Pushing changes."
     git push --force-with-lease --set-upstream origin "$BRANCH_NAME"
 else
-    echo "No changes detected."
+    echo "No Changes detected"
 fi
+echo "" # newline
+
 
 # Create or Update PR
-
+echo "Create or Update PR"
 if gh pr list -H "$BRANCH_NAME" --json title | grep -q '\"title\"'
 then
     echo "PR found. Adding comment."
