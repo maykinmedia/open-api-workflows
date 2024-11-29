@@ -27,17 +27,27 @@ fi
 
 # Fetch
 git fetch
-
+echo "=============================================================================== Stash"
 # Create Branch
 git stash
+echo "=============================================================================== Switch"
 git switch "$BRANCH_NAME" || git switch -c "$BRANCH_NAME"
+echo "=============================================================================== Pop"
+git stash pop
+echo "=============================================================================== Diff"
+git diff
+
+echo "=============================================================================== Update"
 
 # Push if Update
 if ! [[ $(git ls-remote --exit-code --heads origin refs/heads/"$BRANCH_NAME") &&  $(git diff --exit-code "$BRANCH_NAME" origin/"$BRANCH_NAME") ]]; then
-    echo "Changes detected. Creating commit and pushing"
+    echo "Changes detected. Creating commit and pushing."
     git commit -a -m "$COMMIT_MESSAGE"
     git push --force-with-lease --set-upstream origin "$BRANCH_NAME"
+else
+    echo "No changes detected."
 fi
+echo "=============================================================================== Create PR"
 
 # Create or Update PR
 
