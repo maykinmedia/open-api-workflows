@@ -32,7 +32,7 @@ runs:
       env:
         BRANCH_NAME: ${{ inputs.branch-name }}
         BASE_BRANCH: ${{github.ref_name}}
-        COMMIT_MESSSAGE: ${{ inputs.commit-message }}
+        COMMIT_MESSAGE: ${{ inputs.commit-message }}
         PR_TITLE: ${{ inputs.pr-title }}
         ACTION_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         RUN_ID: ${{ github.run_id }}

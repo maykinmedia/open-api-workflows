@@ -8,8 +8,8 @@ if ! [[ $BASE_BRANCH ]]; then
     echo "BASE_BRANCH variable is required"
     exit 1
 fi
-if ! [[ $COMMIT_MESSSAGE ]]; then
-    echo "COMMIT_MESSSAGE variable is required"
+if ! [[ $COMMIT_MESSAGE ]]; then
+    echo "COMMIT_MESSAGE variable is required"
     exit 1
 fi
 if ! [[ $PR_TITLE ]]; then
@@ -35,8 +35,8 @@ git switch "$BRANCH_NAME" || git switch -c "$BRANCH_NAME"
 # Push if Update
 if ! [[ $(git ls-remote --exit-code --heads origin refs/heads/"$BRANCH_NAME") &&  $(git diff --exit-code "$BRANCH_NAME" origin/"$BRANCH_NAME") ]]; then
     echo "Changes detected. Creating commit and pushing"
-    git commit -a -m "$COMMIT_MESSSAGE"
-    git push -f --set-upstream origin "$BRANCH_NAME"
+    git commit -a -m "$COMMIT_MESSAGE"
+    git push --force-with-lease --set-upstream origin "$BRANCH_NAME"
 fi
 
 # Create or Update PR
