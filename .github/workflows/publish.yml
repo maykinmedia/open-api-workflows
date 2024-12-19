@@ -5,7 +5,7 @@ on:
       docker-image-name:
         required: true
         type: string
-        description: 'Name for the docker image to be build'
+        description: "Name for the docker image to be build"
 
       repository-owner:
         required: true
@@ -20,15 +20,14 @@ on:
       docker-token:
         required: true
 
-
 jobs:
   publish:
     name: Push Docker image
     runs-on: ubuntu-latest
     if: >
-        github.event_name == 'push' &&
-        github.repository_owner == inputs.repository-owner &&
-        github.ref_type == 'tag'
+      github.event_name == 'push' &&
+      github.repository_owner == inputs.repository-owner &&
+      (github.ref_type == 'tag' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch))
 
     steps:
       - uses: actions/checkout@v4
@@ -44,11 +43,11 @@ jobs:
           # Strip git ref prefix from version
           VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
 
+          # Use Docker `latest` tag convention for the default branch
+          [[ "${{ github.event.repository.default_branch }}" == $VERSION ]] && VERSION=latest
+
           # Strip "v" prefix from tag name (if present at all)
           [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-          # Use Docker `latest` tag convention
-          [ "$VERSION" == "main" ] && VERSION=latest
 
           echo "tag=${VERSION}" >> $GITHUB_OUTPUT
 
