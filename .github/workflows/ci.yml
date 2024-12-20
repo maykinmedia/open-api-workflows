@@ -16,6 +16,10 @@ on:
         type: string
         description: 'Name for the docker image to be build'
 
+      django-settings-module:
+        required: true
+        type: string
+
       run-docs:
         default: false
         type: boolean
@@ -70,6 +74,7 @@ jobs:
       - name: Build and test docs
         env:
           OPENSSL_CONF: ${{ inputs.docs-ssl-conf }}
+          DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
         run: |
           pytest check_sphinx.py --verbose --tb=auto
         working-directory: docs
