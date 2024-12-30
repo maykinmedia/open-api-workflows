@@ -28,7 +28,7 @@ jobs:
         # save the package version for branch names and commit messages
         if: failure()
         id: save-oaf-version
-        run: echo "OAF_VERSION=$(grep -Po '(?<=open-api-framework==)[^\n]*' requirements/dev.txt)" >> $GITHUB_ENV
+        run: echo "OAF_VERSION=$(grep -perl-regexp --only-matching '(?<=open-api-framework==)[^\n]*' requirements/dev.txt)" >> $GITHUB_ENV
       - name: Create Update PR
         if: ${{ failure() && steps.save-oaf-version.conclusion == 'success' }}
         uses: maykinmedia/open-api-workflows/actions/create-update-pr@feature/udate-oaf-pr

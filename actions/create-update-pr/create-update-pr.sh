@@ -29,25 +29,23 @@ fi
 git fetch
 
 # Force Create Branch
-git switch -C "$BRANCH_NAME"
-echo "" # newline
+git switch --force-create "$BRANCH_NAME"
 
-echo "Show Status:"
+printf "\nShow Status:"
 git status
-echo "" # newline
 
-echo "Commit Any Changes"
+
+printf "\nCommit Any Changes"
 if ! git diff --exit-code --quiet
 then
     echo "Commiting Files"
-    git add -A
-    git commit -m "$COMMIT_MESSAGE"
+    git add --all
+    git commit --message="$COMMIT_MESSAGE"
 else
     echo "No files to commit"
 fi
-echo "" # newline
 
-echo "Check if Changes have been made"
+printf "\nCheck if Changes have been made"
 if ! git ls-remote --exit-code --quiet --heads origin refs/heads/"$BRANCH_NAME"
 then
     echo "No Remote Found, creating"
@@ -60,18 +58,16 @@ then
 else
     echo "No Changes detected"
 fi
-echo "" # newline
-
 
 # Create or Update PR
-echo "Create or Update PR"
-if gh pr list -H "$BRANCH_NAME" --json title | grep -q '\"title\"'
+printf "\nCreate or Update PR"
+if gh pr list --head "$BRANCH_NAME" --json title | grep -q '\"title\"'
 then
     echo "PR found. Adding comment."
     gh pr comment "$BRANCH_NAME" --body "Updated by github action [$RUN_ID]($ACTION_URL)"
 else
     echo "Creating new PR"
-    gh pr create -B "$BASE_BRANCH" \
+    gh pr create --base "$BASE_BRANCH" \
         --title "$PR_TITLE" \
         --body "Generated with github action [$RUN_ID]($ACTION_URL)"
 fi
