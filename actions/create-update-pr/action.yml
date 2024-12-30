@@ -25,7 +25,7 @@ runs:
       run: echo "$GITHUB_ACTION_PATH/bin" >> $GITHUB_PATH
       shell: bash
       env:
-        GITHUB_ACTION_PATH: ${{ github.action_path }}
+        GITHUB_ACTION_PATH: ${{ github.action_path }} # location of action.yml
     - name: Run Script
       shell: bash
       run: create-update-pr.sh
