@@ -1,0 +1,39 @@
+name: "Create or Update PR"
+description: "Create or Update a from one branch to another."
+author: "Maykin Media"
+
+inputs:
+  branch-name:
+    description: 'Name of the Update Branch'
+    required: true
+  commit-message:
+    description: 'Message of the update commit'
+    required: true
+  pr-title:
+    description: 'Title of the PR'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Git credentials
+      shell: bash
+      run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+    - name: Set GitHub Path
+      run: echo "$GITHUB_ACTION_PATH/bin" >> $GITHUB_PATH
+      shell: bash
+      env:
+        GITHUB_ACTION_PATH: ${{ github.action_path }} # location of action.yml
+    - name: Run Script
+      shell: bash
+      run: create-update-pr.sh
+      env:
+        BRANCH_NAME: ${{ inputs.branch-name }}
+        BASE_BRANCH: ${{github.ref_name}}
+        COMMIT_MESSAGE: ${{ inputs.commit-message }}
+        PR_TITLE: ${{ inputs.pr-title }}
+        ACTION_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        RUN_ID: ${{ github.run_id }}
+        GH_TOKEN: ${{ github.token }}
