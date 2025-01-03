@@ -31,7 +31,7 @@ jobs:
         run: echo "OAF_VERSION=$(grep --perl-regexp --only-matching '(?<=open-api-framework==)[^\n]*' requirements/dev.txt)" >> $GITHUB_ENV
       - name: Create Update PR
         if: ${{ failure() && steps.save-oaf-version.conclusion == 'success' }}
-        uses: maykinmedia/open-api-workflows/actions/create-update-pr@feature/udate-oaf-pr
+        uses: maykinmedia/open-api-workflows/actions/create-update-pr@v4-a
         with:
           branch-name: update/open-api-framework-${{env.OAF_VERSION}}
           commit-message: ':arrow_up: Update Open-API-Framework to ${{env.OAF_VERSION}}'
