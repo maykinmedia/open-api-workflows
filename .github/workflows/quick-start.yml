@@ -6,14 +6,11 @@ on:
       fixtures:
         required: false
         type: string
-      
-      superuser:
+        
+      port:
         required: false
         type: string
-
-      web_service:
-        required: false
-        type: string
+        default: "8000"
 
 jobs:
   run:
@@ -32,16 +29,11 @@ jobs:
       - name: Load fixtures
         if: ${{ inputs.fixtures != '' }}
         run: docker compose exec -T web src/manage.py loaddata ${{ inputs.fixtures }}
-      - name: Create superuser
-        run: |
-          SUPERUSER="${{ inputs.superuser || 'admin' }}"
-          WEB_SERVICE="${{ inputs.web_service || 'web' }}"
-          docker compose exec -T $WEB_SERVICE src/manage.py createsuperuser --username $SUPERUSER --email $SUPERUSER@admin.nl --no-input
       - name: Check main page
         run: |
-          curl_status=$(curl -w '%{http_code}' -o /dev/null  -s http://localhost:8000/)
+          curl_status=$(curl -w '%{http_code}' -o /dev/null  -s http://localhost:${{ inputs.port }}/)
           if [[ $curl_status != 200 ]]; then
             printf "Index page responds with ${curl_status} status.\r\n\r\n" >&2
-            curl -i http://localhost:8000
+            curl -i http://localhost:${{ inputs.port }}
             exit 1
           fi 
