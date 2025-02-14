@@ -1,0 +1,39 @@
+name: quick-start
+
+on:
+  workflow_call:
+    inputs:
+      fixtures:
+        required: false
+        type: string
+        
+      port:
+        required: false
+        type: string
+        default: "8000"
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start docker containers
+        run: docker compose up -d --build || ( docker compose logs >&2 && exit 1; )
+      - name: Wait for migrations to finish
+        run: |
+          echo "Waiting for migrations to complete..."
+          until ! docker compose exec -T web src/manage.py showmigrations | grep -q '\[ \]'; do
+            echo "Migrations not finished, waiting..."
+            sleep 3
+          done
+      - name: Load fixtures
+        if: ${{ inputs.fixtures != '' }}
+        run: docker compose exec -T web src/manage.py loaddata ${{ inputs.fixtures }}
+      - name: Check main page
+        run: |
+          curl_status=$(curl -w '%{http_code}' -o /dev/null  -s http://localhost:${{ inputs.port }}/)
+          if [[ $curl_status != 200 ]]; then
+            printf "Index page responds with ${curl_status} status.\r\n\r\n" >&2
+            curl -i http://localhost:${{ inputs.port }}
+            exit 1
+          fi 
