@@ -2,6 +2,11 @@
 Change history
 ==============
 
+v4.2.1 (2025-02-25)
+-------------------
+
+* Wait for uWSGI to be started in quickstart job
+
 v4.2.0 (2025-02-14)
 -------------------
 
