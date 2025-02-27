@@ -2,6 +2,11 @@
 Change history
 ==============
 
+v4.2.2 (2025-02-27)
+-------------------
+
+* Allow passing of different service name to quickstart job
+
 v4.2.1 (2025-02-25)
 -------------------
 
