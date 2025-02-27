@@ -3,6 +3,11 @@ name: quick-start
 on:
   workflow_call:
     inputs:
+      service_name:
+        required: false
+        type: string
+        default: web
+
       fixtures:
         required: false
         type: string
@@ -21,13 +26,13 @@ jobs:
         run: docker compose up -d --build || ( docker compose logs >&2 && exit 1; )
       - name: Wait until uWSGI is running
         run: |
-          until docker compose logs web | grep -q "spawned uWSGI worker"; do
+          until docker compose logs ${{ inputs.service_name }} | grep -q "spawned uWSGI worker"; do
             echo "uWSGI not running yet, waiting..."
             sleep 3
           done
       - name: Load fixtures
         if: ${{ inputs.fixtures != '' }}
-        run: docker compose exec -T web src/manage.py loaddata ${{ inputs.fixtures }}
+        run: docker compose exec -T ${{ inputs.service_name }} src/manage.py loaddata ${{ inputs.fixtures }}
       - name: Check main page
         run: |
           curl_status=$(curl -w '%{http_code}' -o /dev/null  -s http://localhost:${{ inputs.port }}/)
