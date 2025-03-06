@@ -13,17 +13,17 @@ on:
       schema-command:
         type: string
         description: 'The command which will be used to generate the OAS file(s)'
-        default: 'spectacular'
+        default: 'bin/generate_schema.sh'
+
+      schema-path:
+        type: string
+        description: 'Location of the OAS file'
+        default: 'src/openapi.yaml'
 
       schema-options:
         type: string
         description: 'The options passed to the `schema-command`'
         default: ''
-
-      schema-path:
-        required: true
-        type: string
-        description: 'Location of the OAS file'
 
       apt-packages:
         required: false
@@ -53,10 +53,7 @@ jobs:
 
       - name: Generate OAS file
         run: |
-          src/manage.py ${{ inputs.schema-command }} \
-          ${{ inputs.schema-options }} \
-          --file "${{ steps.path.outputs.path }}" \
-          --validate
+          ${{ inputs.schema-command }} ${{ inputs.schema-options }}
         env:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
 
