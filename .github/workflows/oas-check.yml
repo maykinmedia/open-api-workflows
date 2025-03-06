@@ -61,4 +61,4 @@ jobs:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
 
       - name: Compare OAS files
-        run: cmp --silent ${{ steps.path.outputs.path }} ${{ inputs.schema-path }}
+        run: diff ${{ steps.path.outputs.path }} ${{ inputs.schema-path }}
