@@ -31,20 +31,24 @@ on:
 
 jobs:
   oas-up-to-date:
-    name: Check for unexepected OAS changes
+    name: Check for unexpected OAS changes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up backend environment
         uses: maykinmedia/setup-django-backend@v1.3
         with:
-          apt-packages: ${{ inputs.apt-packages }}
+          apt-packages: ${{ inputs.apt-packages }} gettext
           python-version: ${{ inputs.python-version }}
           setup-node: true
 
+      - name: Compile translations
+        run: cd src/ && ./manage.py compilemessages
+        env:
+          DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
+
       - name: Generate OAS file
-        run: |
-          ${{ inputs.schema-command }} ${{ inputs.schema-options }}
+        run: ${{ inputs.schema-command }} ${{ inputs.schema-options }}
         env:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
 
