@@ -42,15 +42,6 @@ jobs:
           python-version: ${{ inputs.python-version }}
           setup-node: true
 
-      - name: Generate an UUID for the OAS file
-        id: uuid
-        run: echo "uuid=$(uuidgen)" >> "$GITHUB_OUTPUT"
-
-      - name: Set the path for the newly generated OAS file
-        id: path
-        run: >
-          echo "path=${{ github.workspace }}/openapi-${{ steps.uuid.outputs.uuid }}.yaml" >> "$GITHUB_OUTPUT"
-
       - name: Generate OAS file
         run: |
           ${{ inputs.schema-command }} ${{ inputs.schema-options }}
@@ -58,4 +49,4 @@ jobs:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
 
       - name: Compare OAS files
-        run: diff ${{ steps.path.outputs.path }} ${{ inputs.schema-path }}
+        run: git diff --exit-code ${{ inputs.schema-path }}
