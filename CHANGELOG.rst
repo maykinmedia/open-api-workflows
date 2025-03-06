@@ -2,6 +2,17 @@
 Change history
 ==============
 
+v5.0.0 (2025-03-06)
+-------------------
+
+Breaking changes:
+* Pass entire generate OAS command as input, this requires the script to be passed via ``schema-command``
+  and the options to be passed via ``schema-options``
+
+New features:
+* Compile translations before generating OAS to allow generating OAS in Dutch
+* Use ``git diff`` to check OAS changes
+
 v4.2.2 (2025-02-27)
 -------------------
 
