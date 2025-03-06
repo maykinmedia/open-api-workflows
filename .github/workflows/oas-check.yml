@@ -13,17 +13,17 @@ on:
       schema-command:
         type: string
         description: 'The command which will be used to generate the OAS file(s)'
-        default: 'spectacular'
+        default: 'bin/generate_schema.sh'
+
+      schema-path:
+        type: string
+        description: 'Location of the OAS file'
+        default: 'src/openapi.yaml'
 
       schema-options:
         type: string
         description: 'The options passed to the `schema-command`'
         default: ''
-
-      schema-path:
-        required: true
-        type: string
-        description: 'Location of the OAS file'
 
       apt-packages:
         required: false
@@ -31,34 +31,26 @@ on:
 
 jobs:
   oas-up-to-date:
-    name: Check for unexepected OAS changes
+    name: Check for unexpected OAS changes
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up backend environment
         uses: maykinmedia/setup-django-backend@v1.3
         with:
-          apt-packages: ${{ inputs.apt-packages }}
+          apt-packages: ${{ inputs.apt-packages }} gettext
           python-version: ${{ inputs.python-version }}
           setup-node: true
 
-      - name: Generate an UUID for the OAS file
-        id: uuid
-        run: echo "uuid=$(uuidgen)" >> "$GITHUB_OUTPUT"
-
-      - name: Set the path for the newly generated OAS file
-        id: path
-        run: >
-          echo "path=${{ github.workspace }}/openapi-${{ steps.uuid.outputs.uuid }}.yaml" >> "$GITHUB_OUTPUT"
+      - name: Compile translations
+        run: cd src/ && ./manage.py compilemessages
+        env:
+          DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
 
       - name: Generate OAS file
-        run: |
-          src/manage.py ${{ inputs.schema-command }} \
-          ${{ inputs.schema-options }} \
-          --file "${{ steps.path.outputs.path }}" \
-          --validate
+        run: ${{ inputs.schema-command }} ${{ inputs.schema-options }}
         env:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
 
       - name: Compare OAS files
-        run: cmp --silent ${{ steps.path.outputs.path }} ${{ inputs.schema-path }}
+        run: git diff --exit-code ${{ inputs.schema-path }}
