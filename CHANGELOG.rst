@@ -2,6 +2,12 @@
 Change history
 ==============
 
+v5.0.1 (2025-03-17)
+-------------------
+
+Bugfixes
+* Replace changed-files action with a basic script (changed-files had a security issue recently)
+
 v5.0.0 (2025-03-06)
 -------------------
 
