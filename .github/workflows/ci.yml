@@ -48,6 +48,15 @@ jobs:
       - name: Get changed requirements files
         id: files
         run: |
+          # Determine the base ref or fallback to the last commit
+          if [ -n "$GITHUB_BASE_REF" ]; then
+            BASE_REF="origin/$GITHUB_BASE_REF"
+          else
+            BASE_REF="HEAD^"  # Compare with the previous commit on main branch
+          fi
+
+          git fetch --all
+
           # Get the list of files that were changed between the base branch and the current commit
           CHANGED_FILES=$(git diff --name-only origin/$GITHUB_BASE_REF...HEAD)
           if [[ -n "$CHANGED_FILES" ]]; then
