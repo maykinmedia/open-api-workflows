@@ -2,6 +2,11 @@
 Change history
 ==============
 
+v5.1.0 (2025-04-17)
+-------------------
+
+* Use uv instead of pip for docs build to speed up the job
+
 v5.0.1 (2025-03-17)
 -------------------
 
