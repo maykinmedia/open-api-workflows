@@ -104,7 +104,9 @@ jobs:
           cache: 'pip'
           cache-dependency-path: 'requirements/*.txt'
       - name: Install dependencies
-        run: pip install --requirement requirements/ci.txt
+        run: |
+          pip install uv
+          uv pip install --system --requirement requirements/ci.txt
       - name: Build and test docs
         env:
           OPENSSL_CONF: ${{ inputs.docs-ssl-conf }}
