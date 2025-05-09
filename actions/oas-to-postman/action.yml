@@ -1,0 +1,75 @@
+---
+
+name: Generate Postman collection from an OpenAPI specification
+
+description: >2
+  Take the provided API specification and verify that a Postman collection can be
+  generated successfully. The collection is uploaded as artifact so you can download and
+  test it.
+
+inputs:
+  schema-path:
+    type: string
+    required: true
+    description: Path or glob (relative to the root of the repo) of specifications to lint.
+    default: 'src/openapi.yaml'
+
+  node-version-file:
+    type: string
+    required: false
+    description: >2
+      Passed down to actions/setup-node, so the same rules apply. Alternatively, use
+      `node-version` instead.
+    default: ''
+
+  node-version:
+    type: string
+    required: false
+    description: >2
+      Passed down to actions/setup-node, so the same rules apply. Alternatively, use
+      `node-version-file` instead.
+    default: ''
+
+  openapi-to-postman-version:
+    type: string
+    required: false
+    description: >2
+      The NPM package version number of openapi-to-postmanv2 to install. It's recommended
+      to pin this for stability reasons.
+    default: '^5.0.0'
+
+  artifact-name:
+    type: string
+    required: false
+    description: >2
+      Name of the artifact to upload with the generated collection. Artifact uploads are
+      skipped if no name is provided.
+    default: ''
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        node-version-file: ${{ inputs.node-version-file }}
+
+    - name: Install and run collection generator
+      run: |
+        npm install -g openapi-to-postmanv2@${{ inputs.openapi-to-postman-version }}
+        mkdir -p ${{ runner.temp }}/postman/
+        openapi2postmanv2 \
+          --spec ${{ inputs.schema-path }} \
+          --output ${{ runner.temp }}/postman/collection.json \
+          --pretty
+      shell: bash
+
+    - name: Upload artifact
+      if: inputs.artifact-name != ''
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ runner.temp }}/postman/collection.json
+        retention-days: 1

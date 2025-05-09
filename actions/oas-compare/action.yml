@@ -1,0 +1,53 @@
+---
+
+name: Compare a generated OpenAPI specification against the version tracked in git.
+
+description: >2
+  Check out the repository and download the generated API specification. Then, check
+  if there are any differences between the versioned and generated API specs.
+
+  Requires the artifact to exist, ideally generated from the `oas-generate` action.
+
+inputs:
+  schema-path:
+    type: string
+    required: false
+    description: Location of the OAS file, relative to working-directory if specified.
+    default: 'src/openapi.yaml'
+
+  artifact-name:
+    type: string
+    required: false
+    description: Name for the artifact of the generated schema.
+    default: generated-oas
+
+  working-directory:
+    type: string
+    required: false
+    description: Specifies the working directory where commands are run.
+    default: ''
+
+runs:
+  using: composite
+
+  steps:
+    - uses: actions/checkout@v4
+    - name: Download generated OAS
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+
+    - name: Check for OAS changes
+      run: |
+        git diff --exit-code ${{ inputs.schema-path }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Write failure markdown
+      if: ${{ failure() }}
+      run: |
+        first_lineno=$(git diff -U0 ${{ inputs.schema-path }} | grep '^@@' | head -1 | sed -E 's/.*\+([0-9]+).*/\1/')
+        filepath="${{ inputs.working-directory != '' && format('{0}/{1}', inputs.working-directory, inputs.schema-path) || inputs.schema-path }}"
+        echo "::error file=$filepath,line=$first_lineno,title=Outdated::There are changes detected in the OpenAPI specification"
+        echo 'Please make sure to re-generate the schema locally and commit the changes.' >> $GITHUB_STEP_SUMMARY
+      shell: bash
