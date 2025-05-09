@@ -1,9 +1,13 @@
 # open-api-workflows
-[Reusable workflows](/.github/workflows/) for several open-api related projects.
-The workflows consists of several jobs which ran similiar across several different
-repositories.
 
-## Usage
+[Reusable workflows](/.github/workflows/) and [actions](./actions) for projects that
+implement an API.
+
+The re-usable workflows compose a number of jobs that should be kept similar across
+a multitude of repositories, while the actions provide lower-level building blocks
+that are also useful in projects that aren't purely API-focused.
+
+## Usage (workflows)
 
 ```yaml
 # ci.yml
