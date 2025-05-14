@@ -111,6 +111,22 @@ on:
           skipped if no name is provided.
         default: ''
 
+      openapi-generator-version:
+        type: string
+        required: false
+        description: >2
+          The NPM package version number of @openapitools/openapi-generator-cli to install.
+          It's recommended to pin this for stability reasons.
+        default: '^2.20.0'
+
+      openapi-generator-config:
+        type: string
+        required: false
+        description: >2
+          Path or URL to the config to use. The default value (`openapitools.json`) is created
+          if it doesn't exist.
+        default: openapitools.json
+
 jobs:
 
   generate-and-compare:
@@ -173,6 +189,22 @@ jobs:
           node-version-file: ${{ inputs.node-version-file }}
           node-version: ${{ inputs.node-version }}
           openapi-to-postman-version: ${{ inputs.openapi-to-postman-version }}
-          artifact-name: ${{ postman-artifact-name }}
+          artifact-name: ${{ inputs.postman-artifact-name }}
 
-  # TODO: SDK generation
+  sdks:
+    name: Generate SDKS
+    runs-on: ubuntu-latest
+
+    needs:
+      - generate-and-compare  # no point in linting something that's not up to date
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: SDK generation
+        uses: maykinmedia/open-api-workflows/actions/oas-sdks@refactor/reusable-actions
+        with:
+          schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
+          node-version-file: ${{ inputs.node-version-file }}
+          node-version: ${{ inputs.node-version }}
+          openapi-generator-version: ${{ inputs.openapi-generator-version }}
+          config: ${{ inputs.openapi-generator-config }}
