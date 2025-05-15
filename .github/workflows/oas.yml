@@ -172,7 +172,7 @@ jobs:
           node-version-file: ${{ inputs.node-version-file }}
           node-version: ${{ inputs.node-version }}
           spectral-version: ${{ inputs.spectral-version }}
-          spectral-ruleset: ${{ inputs.spectral-ruleset }}
+          ruleset: ${{ inputs.spectral-ruleset }}
 
   postman-collection:
     name: Generate Postman collection
