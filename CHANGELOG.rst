@@ -2,6 +2,11 @@
 Change history
 ==============
 
+v5.2.0 (2025-05-19)
+-------------------
+
+* Modularize the OAS actions/workflows into a single workflow ``oas.yml``
+
 v5.1.0 (2025-04-17)
 -------------------
 
