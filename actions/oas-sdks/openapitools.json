@@ -1,0 +1,50 @@
+{
+  "$schema": "~/.npm-global/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.13.0",
+    "generators": {
+      "java": {
+        "generatorName": "java",
+        "inputSpec": "${{ inputs.schema-path }}",
+        "output": "#{cwd}/sdks/java",
+        "globalProperty": {
+          "modelTests": false,
+          "apiTests": false,
+          "modelDocs": false,
+          "apiDocs": false
+        },
+        "additionalProperties": {
+          "dateLibrary": "java8"
+        }
+      },
+      ".net": {
+        "generatorName": "csharp",
+        "inputSpec": "${{ inputs.schema-path }}",
+        "output": "#{cwd}/sdks/dotnet",
+        "globalProperty": {
+          "modelTests": false,
+          "apiTests": false,
+          "modelDocs": false,
+          "apiDocs": false
+        },
+        "additionalProperties": {
+          "optionalProjectFile": false,
+          "optionalAssemblyInfo": false
+        }
+      },
+      "python": {
+        "generatorName": "python",
+        "inputSpec": "${{ inputs.schema-path }}",
+        "output": "#{cwd}/sdks/python",
+        "globalProperty": {
+          "modelTests": false,
+          "apiTests": false,
+          "modelDocs": false,
+          "apiDocs": false
+        },
+        "additionalProperties": {}
+      }
+    }
+  }
+}

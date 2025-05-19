@@ -1,0 +1,210 @@
+# Run quality control on the (generated) Open API specification.
+#
+# This workflow is intended to replace:
+# - generate-postman-collection.yml
+# - generate-sdks.yml
+# - lint-oas.yml
+# - oas-check.yml
+#
+# The OAS must:
+# * not be outdated w/r to the code from which it is generated
+# * not have any linting errors
+# * be valid input to generate a Postman collection
+# * be valid input to generate SDKs in commonly used languages/frameworks
+#
+# When dealing with multiple versions, you can adapt this workflow to run a matrix and
+# pass arguments down that way, and/or use a parent workflow to call this workflow for
+# each matrix item. See https://docs.github.com/en/actions/sharing-automations/reusing-workflows
+
+name: "Check OAS"
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        type: string
+        required: false
+        description: Python version, passed to actions/setup-python
+        default: '3.12'
+
+      django-settings-module:
+        required: true
+        type: string
+
+      oas-generate-command:
+        type: string
+        required: false
+        description: >
+          (Binary) command to run to generate the schema. If working-directory is specified,
+          it's relative to this directory.
+        default: 'bin/generate_schema.sh'
+
+      schema-path:
+        type: string
+        required: false
+        description: Location of the OAS file, relative to working-directory if specified.
+        default: 'src/openapi.yaml'
+
+      oas-artifact-name:
+        type: string
+        required: false
+        description: Name for the artifact of the generated schema.
+        default: generated-oas
+
+      apt-packages:
+        type: string
+        required: false
+        description: Any additional apt packages to install, space-separated
+        default: ''
+
+      working-directory:
+        type: string
+        required: false
+        description: Specifies the working directory where commands are run.
+        default: ''
+
+      node-version-file:
+        type: string
+        required: false
+        description: >2
+          Passed down to actions/setup-node, so the same rules apply. Alternatively, use
+          `node-version` instead.
+        default: ''
+
+      node-version:
+        type: string
+        required: false
+        description: >2
+          Passed down to actions/setup-node, so the same rules apply. Alternatively, use
+          `node-version-file` instead.
+        default: ''
+
+      spectral-version:
+        type: string
+        required: false
+        description: >2
+          The NPM package version number of spectral-cli to install. It's recommended
+          to pin this for stability reasons.
+        default: '^6.15.0'
+
+      spectral-ruleset:
+        type: string
+        required: false
+        description: >2
+          Path or URL to the ruleset to use. The default value (`.spectral.yaml`) is created
+          if it doesn't exist.
+        default: .spectral.yaml
+
+      openapi-to-postman-version:
+        type: string
+        required: false
+        description: >2
+          The NPM package version number of openapi-to-postmanv2 to install. It's recommended
+          to pin this for stability reasons.
+        default: '^5.0.0'
+
+      postman-artifact-name:
+        type: string
+        required: false
+        description: >2
+          Name of the artifact to upload with the generated collection. Artifact uploads are
+          skipped if no name is provided.
+        default: ''
+
+      openapi-generator-version:
+        type: string
+        required: false
+        description: >2
+          The NPM package version number of @openapitools/openapi-generator-cli to install.
+          It's recommended to pin this for stability reasons.
+        default: '^2.20.0'
+
+      openapi-generator-config:
+        type: string
+        required: false
+        description: >2
+          Path or URL to the config to use. The default value (`openapitools.json`) is created
+          if it doesn't exist.
+        default: openapitools.json
+
+jobs:
+
+  generate-and-compare:
+    name: Generate OAS and check staleness
+    runs-on: ubuntu-latest
+
+    outputs:
+      schema-path: ${{ steps.generate.outputs.schema-path }}
+
+    steps:
+      - name: Generate
+        uses: maykinmedia/open-api-workflows/actions/oas-generate@refactor/reusable-actions
+        id: generate
+        with:
+          python-version: ${{ inputs.python-version }}
+          command: ${{ inputs.oas-generate-command }}
+          artifact-name: ${{ inputs.oas-artifact-name }}
+          schema-path: ${{ inputs.schema-path }}
+          apt-packages: ${{ inputs.apt-packages }}
+          working-directory: ${{ inputs.working-directory }}
+        env:
+          DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
+
+      - name: Compare
+        uses: maykinmedia/open-api-workflows/actions/oas-compare@refactor/reusable-actions
+        with:
+          artifact-name: ${{ inputs.oas-artifact-name }}
+          schema-path: ${{ inputs.schema-path }}
+          working-directory: ${{ inputs.working-directory }}
+
+  lint:
+    name: Lint OAS
+    runs-on: ubuntu-latest
+    needs:
+      - generate-and-compare  # no point in linting something that's not up to date
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint
+        uses: maykinmedia/open-api-workflows/actions/oas-lint@refactor/reusable-actions
+        with:
+          schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
+          node-version-file: ${{ inputs.node-version-file }}
+          node-version: ${{ inputs.node-version }}
+          spectral-version: ${{ inputs.spectral-version }}
+          ruleset: ${{ inputs.spectral-ruleset }}
+
+  postman-collection:
+    name: Generate Postman collection
+    runs-on: ubuntu-latest
+    needs:
+      - generate-and-compare  # no point in linting something that's not up to date
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate collection
+        uses: maykinmedia/open-api-workflows/actions/oas-to-postman@refactor/reusable-actions
+        with:
+          schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
+          node-version-file: ${{ inputs.node-version-file }}
+          node-version: ${{ inputs.node-version }}
+          openapi-to-postman-version: ${{ inputs.openapi-to-postman-version }}
+          artifact-name: ${{ inputs.postman-artifact-name }}
+
+  sdks:
+    name: Generate SDKS
+    runs-on: ubuntu-latest
+
+    needs:
+      - generate-and-compare  # no point in linting something that's not up to date
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: SDK generation
+        uses: maykinmedia/open-api-workflows/actions/oas-sdks@refactor/reusable-actions
+        with:
+          schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
+          node-version-file: ${{ inputs.node-version-file }}
+          node-version: ${{ inputs.node-version }}
+          openapi-generator-version: ${{ inputs.openapi-generator-version }}
+          config: ${{ inputs.openapi-generator-config }}

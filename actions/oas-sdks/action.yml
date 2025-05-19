@@ -1,0 +1,147 @@
+---
+
+name: Lint the specified OpenAPI spec using spectral.
+
+description: >2
+  Installs and runs the spectral linter on the specified OpenAPI specification(s).
+
+
+  You can provide the API specification in a number of ways: checkout the repository
+  using actions/checkout, or download an earlier generated artifact. This action does
+  *not* run the checkout itself.
+
+inputs:
+  schema-path:
+    type: string
+    required: true
+    description: Path or glob (relative to the root of the repo) of specifications to lint.
+    default: 'src/openapi.yaml'
+
+  node-version-file:
+    type: string
+    required: false
+    description: >2
+      Passed down to actions/setup-node, so the same rules apply. Alternatively, use
+      `node-version` instead.
+    default: ''
+
+  node-version:
+    type: string
+    required: false
+    description: >2
+      Passed down to actions/setup-node, so the same rules apply. Alternatively, use
+      `node-version-file` instead.
+    default: ''
+
+  openapi-generator-version:
+    type: string
+    required: false
+    description: >2
+      The NPM package version number of @openapitools/openapi-generator-cli to install.
+      It's recommended to pin this for stability reasons.
+    default: '^2.20.0'
+
+  config:
+    type: string
+    required: false
+    description: >2
+      Path or URL to the config to use. The default value (`openapitools.json`) is created
+      if it doesn't exist.
+    default: openapitools.json
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        node-version-file: ${{ inputs.node-version-file }}
+
+    # Cache this package, because it needs to download stuff from Maven which breaks
+    # all the time.
+    - name: Cache global npm packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm-global
+        key: npm-global-${{ runner.os }}-${{ inputs.openapi-generator-version }}
+
+    - name: Set up (default) config file
+      run: |
+        if [ ! -f openapitools.json ]; then
+          echo 'Creating default config'
+
+          cat << "EOF" > openapitools.json
+        {
+          "$schema": "~/.npm-global/@openapitools/openapi-generator-cli/config.schema.json",
+          "spaces": 2,
+          "generator-cli": {
+            "version": "7.13.0",
+            "generators": {
+              "java": {
+                "generatorName": "java",
+                "inputSpec": "${{ inputs.schema-path }}",
+                "output": "#{cwd}/sdks/java",
+                "globalProperty": {
+                  "modelTests": false,
+                  "apiTests": false,
+                  "modelDocs": false,
+                  "apiDocs": false
+                },
+                "additionalProperties": {
+                  "dateLibrary": "java8"
+                }
+              },
+              ".net": {
+                "generatorName": "csharp",
+                "inputSpec": "${{ inputs.schema-path }}",
+                "output": "#{cwd}/sdks/dotnet",
+                "globalProperty": {
+                  "modelTests": false,
+                  "apiTests": false,
+                  "modelDocs": false,
+                  "apiDocs": false
+                },
+                "additionalProperties": {
+                  "optionalProjectFile": false,
+                  "optionalAssemblyInfo": false
+                }
+              },
+              "python": {
+                "generatorName": "python",
+                "inputSpec": "${{ inputs.schema-path }}",
+                "output": "#{cwd}/sdks/python",
+                "globalProperty": {
+                  "modelTests": false,
+                  "apiTests": false,
+                  "modelDocs": false,
+                  "apiDocs": false
+                },
+                "additionalProperties": {}
+              }
+            }
+          }
+        }
+        EOF
+
+        fi
+      shell: bash
+
+    - name: Install @openapitools/openapi-generator-cli
+      run: |
+        # Set up global path
+        npm config set prefix ~/.npm-global
+        echo "$HOME/.npm-global/bin" >> $GITHUB_PATH
+
+        # And install the package
+        npm install -g @openapitools/openapi-generator-cli@${{ inputs.openapi-generator-version }}
+        # Ensure that the Java package is installed, which saves it in the package directory
+        ~/.npm-global/bin/openapi-generator-cli help
+      shell: bash
+
+    - name: Run validator and generator
+      run: |
+        openapi-generator-cli --openapitools ${{ inputs.config }} validate --input-spec ${{ inputs.schema-path }}
+        openapi-generator-cli --openapitools ${{ inputs.config }} generate
+      shell: bash

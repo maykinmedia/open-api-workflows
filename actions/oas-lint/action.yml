@@ -1,0 +1,74 @@
+---
+
+name: Lint the specified OpenAPI spec using spectral.
+
+description: >2
+  Installs and runs the spectral linter on the specified OpenAPI specification(s).
+
+
+  You can provide the API specification in a number of ways: checkout the repository
+  using actions/checkout, or download an earlier generated artifact. This action does
+  *not* run the checkout itself.
+
+inputs:
+  schema-path:
+    type: string
+    required: true
+    description: Path or glob (relative to the root of the repo) of specifications to lint.
+    default: 'src/openapi.yaml'
+
+  node-version-file:
+    type: string
+    required: false
+    description: >2
+      Passed down to actions/setup-node, so the same rules apply. Alternatively, use
+      `node-version` instead.
+    default: ''
+
+  node-version:
+    type: string
+    required: false
+    description: >2
+      Passed down to actions/setup-node, so the same rules apply. Alternatively, use
+      `node-version-file` instead.
+    default: ''
+
+  spectral-version:
+    type: string
+    required: false
+    description: >2
+      The NPM package version number of spectral-cli to install. It's recommended
+      to pin this for stability reasons.
+    default: '^6.15.0'
+
+  ruleset:
+    type: string
+    required: false
+    description: >2
+      Path or URL to the ruleset to use. The default value (`.spectral.yaml`) is created
+      if it doesn't exist.
+    default: .spectral.yaml
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        node-version-file: ${{ inputs.node-version-file }}
+
+    - name: Set up (default) ruleset
+      run: |
+        if [ ! -f .spectral.yaml ]; then
+          echo 'Creating default ruleset'
+          echo 'extends: ["spectral:oas"]' > .spectral.yaml
+        fi
+      shell: bash
+
+    - name: Install and run Spectral linter
+      run: |
+        npm install -g @stoplight/spectral-cli@${{ inputs.spectral-version }}
+        spectral lint ${{ inputs.schema-path }} --ruleset ${{ inputs.ruleset }}
+      shell: bash

@@ -1,0 +1,51 @@
+---
+
+name: Extract version information from the git state
+
+description: >2
+  Given the checked out repository and github event, determine which "version" is being
+  built in CI.
+
+  Pull requests and builds on the default branch (main/master) resolve to the version
+  `latest`, while git tags are used as value for the version (after stripping a `v` prefix
+  if present).
+
+  The action outputs two variables: `version` and `git_hash` that you can use in the
+  rest of your job/workflow.
+
+inputs: {}
+
+outputs:
+  version:
+    value: ${{ steps.vars.outputs.version }}
+    description: >2
+      The resolved version - either a version number for tags, or 'latest' for
+      pull requests and pushes to the default branch.
+  git_hash:
+    value: ${{ steps.vars.outputs.git_hash }}
+    description: >2
+      The git SHA calculated by Github - for pull requests this will be the commit hash
+      of the merge commit.
+
+runs:
+  using: composite
+
+  steps:
+    - name: Extract version information
+      id: vars
+      run: |
+        # Strip git ref prefix from version
+        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+        # Strip "v" prefix from tag name (if present at all)
+        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+        # Use Docker `latest` tag convention
+        [ "$VERSION" == "${{ github.event.repository.default_branch }}" ] && VERSION=latest
+
+        # PRs result in version 'merge' -> transform that into 'latest'
+        [ "$VERSION" == "merge" ] && VERSION=latest
+
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "git_hash=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+      shell: bash

@@ -1,0 +1,98 @@
+---
+
+name: Generate the OpenAPI specification from source
+
+description: >2
+  Check out the repository and generate the API specification from the source code.
+
+  Any environment variables set on the job or workflow are available, so use that to
+  specify `DJANGO_SETTINGS_MODULE` accordingly.
+
+
+  The result is uploaded as Github artifact so that it can be re-used in other steps
+  without needing to re-generate it all the time.
+
+inputs:
+  # inputs for the generation itself
+  command:
+    type: string
+    required: false
+    description: >
+      (Binary) command to run to generate the schema. If working-directory is specified,
+      it's relative to this directory.
+    default: 'bin/generate_schema.sh'
+
+  schema-path:
+    type: string
+    required: false
+    description: Location of the OAS file, relative to working-directory if specified.
+    default: 'src/openapi.yaml'
+
+  artifact-name:
+    type: string
+    required: false
+    description: Name for the artifact of the generated schema.
+    default: generated-oas
+
+  # inputs for maykinmedia/setup-django-backend
+  python-version:
+    type: string
+    required: false
+    description: Python version, passed to actions/setup-python
+    default: '3.12'
+
+  apt-packages:
+    type: string
+    required: false
+    description: Any additional apt packages to install, space-separated
+    default: ''
+
+  working-directory:
+    type: string
+    required: false
+    description: Specifies the working directory where commands are run.
+    default: ''
+
+outputs:
+  schema-path:
+    description: >
+      Calculated (relative) path of the generated schema to the repository root.
+    value: ${{ steps.calculate-schema-path.outputs.schema-path }}
+
+runs:
+  using: composite
+
+  steps:
+    - uses: actions/checkout@v4
+    - name: Set up backend environment
+      uses: maykinmedia/setup-django-backend@v1.3
+      with:
+        python-version: ${{ inputs.python-version }}
+        apt-packages: gettext ${{ inputs.apt-packages }}
+        working-directory: ${{ inputs.working-directory }}
+        optimize-postgres: 'no'
+        setup-node: 'no'
+
+    - name: Generate the API specification
+      run: |
+        src/manage.py compilemessages
+        ${{ inputs.command }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+
+    - name: Calculate schema path relative to repository root
+      id: calculate-schema-path
+      run: |
+        echo "schema-path=${{ inputs.working-directory != '' && format('{0}/{1}', inputs.working-directory, inputs.schema-path) || inputs.schema-path }}" >> $GITHUB_OUTPUT
+        touch .gitkeep
+      shell: bash
+
+    - name: Store generated API specification for later use
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        # jeez github... https://github.com/actions/upload-artifact/issues/174
+        path: |
+          ${{ steps.calculate-schema-path.outputs.schema-path }}
+          .gitkeep
+        retention-days: 1
