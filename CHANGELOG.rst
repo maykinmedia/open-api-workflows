@@ -2,6 +2,11 @@
 Change history
 ==============
 
+v5.3.0 (2025-05-20)
+-------------------
+
+* [maykinmedia/open-api-framework#133] Replace ``black`` / ``isort`` / ``flake8`` with ``ruff`` in ``code-quality.yml`` workflow
+
 v5.2.0 (2025-05-19)
 -------------------
 
