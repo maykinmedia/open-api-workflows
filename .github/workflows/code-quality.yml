@@ -17,15 +17,9 @@ on:
         default: 'postgres:latest'
         type: string
 
-      isort-src-pattern:
-        type: string
-        default: 'src'
-      black-src-pattern:
+      ruff-src-pattern:
         type: string
         default: 'src docs'
-      flake8-src-pattern:
-        type: string
-        default: 'src'
 
       django-settings-module:
         required: true
@@ -60,12 +54,12 @@ jobs:
           apt-packages: ${{ inputs.apt-packages }}
           python-version: ${{ inputs.python-version }}
           setup-node: false
-      - name: Run isort
-        run: isort --check-only --diff ${{ inputs.isort-src-pattern }}
-      - name: Run black
-        run: black --check --diff ${{ inputs.black-src-pattern }}
-      - name: Run flake8
-        run: flake8 ${{ inputs.flake8-src-pattern }}
+          
+      - name: Run ruff check
+        run: ruff check --output-format=github ${{ inputs.ruff-src-pattern }}
+     
+      - name: Run ruff format
+        run: ruff format --diff ${{ inputs.ruff-src-pattern }}
 
   migrations:
     name: Check for model changes not present in the migrations
