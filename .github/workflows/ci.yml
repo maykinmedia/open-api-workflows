@@ -112,7 +112,8 @@ jobs:
           OPENSSL_CONF: ${{ inputs.docs-ssl-conf }}
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
         run: |
-          pytest check_sphinx.py --verbose --tb=auto
+          make SPHINXOPTS="-W" html
+          make linkcheck
         working-directory: docs
 
   docker-build:
