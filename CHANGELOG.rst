@@ -2,6 +2,11 @@
 Change history
 ==============
 
+v5.3.1 (2025-05-23)
+-------------------
+
+* [maykinmedia/open-api-framework#132] Run docs tests via ``make`` instead of ``pytest``
+
 v5.3.0 (2025-05-20)
 -------------------
 
