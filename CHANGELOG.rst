@@ -2,6 +2,24 @@
 Change history
 ==============
 
+v6.0.0 (2025-11-17)
+-------------------
+
+💥 **Breaking changes**
+
+* Remove obsoleted workflows
+
+  * ``generate-postman-collection.yml``
+  * ``generate-sdks.yml``
+  * ``lint-oas.yml``
+  * ``oas-check.yml``
+
+**Maintenance**
+
+* [#31] Upgrade codeql-action to v4
+* [#15] Remove action that creates a OAF PR
+* [maykinmedia/open-api-framework#132] Run docs tests via make instead of pytest
+
 v5.3.0 (2025-05-20)
 -------------------
 
