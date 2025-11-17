@@ -2,6 +2,14 @@
 Change history
 ==============
 
+v5.4.0 (2025-11-17)
+-------------------
+
+* [#31] Upgrade codeql-action to v4
+* [#15] Remove action that creates a OAF PR
+* Remove obsoleted workflows
+* [maykinmedia/open-api-framework#132] Run docs tests via make instead of pytest
+
 v5.3.0 (2025-05-20)
 -------------------
 
