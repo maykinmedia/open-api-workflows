@@ -2,6 +2,13 @@
 Change history
 ==============
 
+v6.1.0 (2025-11-27)
+-------------------
+
+**New features**
+
+* Publish ``stable`` docker tag for semver releases
+
 v6.0.0 (2025-11-17)
 -------------------
 
