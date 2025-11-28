@@ -52,10 +52,14 @@ jobs:
         run: docker push ${{ inputs.docker-image-name }}:${{ steps.vars.outputs.version }}
 
       - name: Push stable tag
-        if: >
-          startsWith(github.ref, 'refs/tags/') &&
-          matches(github.ref, '^refs/tags/v?[0-9]+\\.[0-9]+(\\.[0-9]+)?$')
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
-          docker tag ${{ inputs.docker-image-name }}:${{ steps.vars.outputs.version }} \
+          TAG_NAME="${{ steps.vars.outputs.version }}"
+
+          if [[ "$TAG_NAME" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+            docker tag ${{ inputs.docker-image-name }}:$TAG_NAME \
                     ${{ inputs.docker-image-name }}:stable
-          docker push ${{ inputs.docker-image-name }}:stable
+            docker push ${{ inputs.docker-image-name }}:stable
+          else
+            echo "Tag '$TAG_NAME' is not a stable version, not updating stable docker tag"
+          fi
