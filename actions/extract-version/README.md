@@ -17,6 +17,6 @@ jobs:
       version: ${{ steps.vars.outputs.version }}
       git_hash: ${{ steps.vars.outputs.git_hash }}
     steps:
-      - uses: maykinmedia/open-api-workflows/actions/extract-version@refactor/reusable-actions
+      - uses: maykinmedia/open-api-workflows/actions/extract-version@v6
         id: vars
 ```

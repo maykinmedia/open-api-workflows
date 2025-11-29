@@ -17,7 +17,7 @@ jobs:
       schema-path: ${{ steps.generate.outputs.schema-path }}
 
     steps:
-      - uses: maykinmedia/open-api-workflows/actions/oas-generate@refactor/reusable-actions
+      - uses: maykinmedia/open-api-workflows/actions/oas-generate@v6
         id: generate
         with:
           artifact-name: my-project-oas
@@ -32,7 +32,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: my-project-oas
-      - uses: maykinmedia/open-api-workflows/actions/oas-lint@refactor/reusable-actions
+      - uses: maykinmedia/open-api-workflows/actions/oas-lint@v6
         with:
           schema-path: ${{ needs.generate.outputs.schema-path }}
           node-version-file: '.nvmrc'
