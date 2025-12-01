@@ -34,18 +34,7 @@ runs:
     - name: Extract version information
       id: vars
       run: |
-        # Strip git ref prefix from version
-        VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-
-        # Strip "v" prefix from tag name (if present at all)
-        [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
-
-        # Use Docker `latest` tag convention
-        [ "$VERSION" == "${{ github.event.repository.default_branch }}" ] && VERSION=latest
-
-        # PRs result in version 'merge' -> transform that into 'latest'
-        [ "$VERSION" == "merge" ] && VERSION=latest
-
-        echo "version=${VERSION}" >> $GITHUB_OUTPUT
-        echo "git_hash=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+        ${{ github.action_path }}/extract_version.sh \
+          "${{ github.ref }}" \
+          "${{ github.event.repository.default_branch }}"
       shell: bash
