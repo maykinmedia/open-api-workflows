@@ -111,12 +111,11 @@ jobs:
         env:
           OPENSSL_CONF: ${{ inputs.docs-ssl-conf }}
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
+          FORCE_COLOR: "1"
         run: |
           make SPHINXOPTS="-W" html
           make linkcheck
         working-directory: docs
-        env:
-          FORCE_COLOR: "1"
 
   docker-build:
     runs-on: ubuntu-latest
