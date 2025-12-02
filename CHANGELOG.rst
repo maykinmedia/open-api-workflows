@@ -2,6 +2,13 @@
 Change history
 ==============
 
+v6.2.0 (2025-12-02)
+-------------------
+
+**Bugfixes**
+
+* Fix duplicated env key in docs build job
+
 v6.2.0 (2025-12-01)
 -------------------
 
