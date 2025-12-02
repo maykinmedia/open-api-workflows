@@ -2,6 +2,24 @@
 Change history
 ==============
 
+v6.2.0 (2025-12-01)
+-------------------
+
+**New features**
+
+* Force colored output for docs build
+
+**Maintenance**
+
+* Use composite action for version info extraction
+* Move shell script to extract version into its own file
+* Disable pushing of ``stable`` tag in ``publish`` workflow (because in its current form, backports would also be pushed as stable)
+
+**Documentation**
+
+* Fix action usage examples tag reference
+* Publish ``stable`` docker tag for semver releases
+
 v6.1.0 (2025-11-27)
 -------------------
 
