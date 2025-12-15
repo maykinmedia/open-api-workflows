@@ -2,7 +2,14 @@
 Change history
 ==============
 
-v6.2.0 (2025-12-02)
+v6.2.2 (2025-12-15)
+-------------------
+
+**Bugfixes**
+
+* Re-enable pushing stable tag for latest versions in ``publish.yml``
+
+v6.2.1 (2025-12-02)
 -------------------
 
 **Bugfixes**
