@@ -2,6 +2,13 @@
 Change history
 ==============
 
+v6.2.4 (2026-02-05)
+-------------------
+
+**Bugfixes**
+
+* Ensure the latest versions of all Git tags are fetched before pushing the latest version in ``publish.yml``
+
 v6.2.3 (2026-01-23)
 -------------------
 
