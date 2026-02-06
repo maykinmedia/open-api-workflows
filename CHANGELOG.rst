@@ -2,6 +2,13 @@
 Change history
 ==============
 
+v6.2.5 (2026-02-06)
+-------------------
+
+**Bugfixes**
+
+* Use ``v6`` tag instead of using the deleted branch ``refactor/reusable-actions``
+
 v6.2.4 (2026-02-05)
 -------------------
 
