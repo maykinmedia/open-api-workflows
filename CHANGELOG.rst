@@ -2,6 +2,13 @@
 Change history
 ==============
 
+v6.2.5 (2026-02-06)
+-------------------
+
+**Bugfixes**
+
+* Pin the correct version (``v6``) in the OAS workflow
+
 v6.2.4 (2026-02-05)
 -------------------
 
