@@ -138,7 +138,7 @@ jobs:
 
     steps:
       - name: Generate
-        uses: maykinmedia/open-api-workflows/actions/oas-generate@refactor/reusable-actions
+        uses: maykinmedia/open-api-workflows/actions/oas-generate@v6
         id: generate
         with:
           python-version: ${{ inputs.python-version }}
@@ -151,7 +151,7 @@ jobs:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
 
       - name: Compare
-        uses: maykinmedia/open-api-workflows/actions/oas-compare@refactor/reusable-actions
+        uses: maykinmedia/open-api-workflows/actions/oas-compare@v6
         with:
           artifact-name: ${{ inputs.oas-artifact-name }}
           schema-path: ${{ inputs.schema-path }}
@@ -166,7 +166,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Lint
-        uses: maykinmedia/open-api-workflows/actions/oas-lint@refactor/reusable-actions
+        uses: maykinmedia/open-api-workflows/actions/oas-lint@v6
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}
@@ -183,7 +183,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Generate collection
-        uses: maykinmedia/open-api-workflows/actions/oas-to-postman@refactor/reusable-actions
+        uses: maykinmedia/open-api-workflows/actions/oas-to-postman@v6
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}
@@ -201,7 +201,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: SDK generation
-        uses: maykinmedia/open-api-workflows/actions/oas-sdks@refactor/reusable-actions
+        uses: maykinmedia/open-api-workflows/actions/oas-sdks@v6
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}
