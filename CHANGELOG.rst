@@ -2,6 +2,30 @@
 Change history
 ==============
 
+v6.3.0 (2026-03-17)
+-------------------
+
+**New features**
+
+* Allow specifying languages to analyze for CodeQL action (``code-analysis.yml``). The
+  default languages used are ``python``, ``javascript`` and ``actions``. An example:
+
+.. code-block:: yaml
+
+    ...
+
+    jobs:
+    open-api-workflow-code-analysis:
+      uses: maykinmedia/open-api-workflows/.github/workflows/code-analysis.yml@v6
+      with:
+        languages: '["python", "javascript"]'
+
+    ...
+
+**Maintenance**
+
+* Enable CodeQL analysis for actions on the ``open-api-workflows`` repo itself
+
 v6.2.5 (2026-02-06)
 -------------------
 

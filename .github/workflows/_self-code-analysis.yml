@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   open-api-workflow-code-analysis:
-    uses: maykinmedia/open-api-workflows/.github/workflows/code-analysis.yml@feature/codeql-for-actions
+    uses: maykinmedia/open-api-workflows/.github/workflows/code-analysis.yml@main
     with:
       languages: '["actions"]'
 
