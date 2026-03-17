@@ -1,0 +1,21 @@
+# Workflow to run CodeQL for actions for the open-api-workflows repo itself
+
+name: CodeQL for actions
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 23 * * 6'
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  open-api-workflow-code-analysis:
+    uses: maykinmedia/open-api-workflows/.github/workflows/code-analysis.yml@feature/codeql-for-actions
+    with:
+      languages: '["actions"]'
+
