@@ -158,7 +158,8 @@ jobs:
           name: docker-image
 
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@master
+        # Pinned to sha for v0.69.3
+        uses: aquasecurity/trivy-action@6fb20c8edd70745d6b34bff0387b53b03c8a760a
         with:
           input: ${{ github.workspace }}/image.tar  # from download-artifact
           format: 'sarif'
