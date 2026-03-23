@@ -2,6 +2,12 @@
 Change history
 ==============
 
+v6.3.1 (2026-03-23)
+-------------------
+
+* Pin ``aquasecurity/trivy-action`` to git SHA for v0.69.3
+* Pin ``github/codeql-action`` to git SHA for v4.34.1
+
 v6.3.0 (2026-03-17)
 -------------------
 
