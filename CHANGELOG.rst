@@ -2,6 +2,11 @@
 Change history
 ==============
 
+v6.3.2 (2026-03-23)
+-------------------
+
+* Fix incorrect pinned git SHA for ``aquasecurity/trivy-action``
+
 v6.3.1 (2026-03-23)
 -------------------
 
