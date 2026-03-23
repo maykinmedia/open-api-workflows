@@ -159,7 +159,7 @@ jobs:
 
       - name: Scan image with Trivy
         # Pinned to sha for v0.69.3
-        uses: aquasecurity/trivy-action@6fb20c8edd70745d6b34bff0387b53b03c8a760a
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
         with:
           input: ${{ github.workspace }}/image.tar  # from download-artifact
           format: 'sarif'
