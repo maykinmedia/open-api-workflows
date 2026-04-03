@@ -149,6 +149,7 @@ jobs:
           working-directory: ${{ inputs.working-directory }}
         env:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
+          SITE_DOMAIN: localhost:8000
 
       - name: Compare
         uses: maykinmedia/open-api-workflows/actions/oas-compare@v6

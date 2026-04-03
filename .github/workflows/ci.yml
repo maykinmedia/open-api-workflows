@@ -111,6 +111,7 @@ jobs:
         env:
           OPENSSL_CONF: ${{ inputs.docs-ssl-conf }}
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
+          SITE_DOMAIN: localhost:8000
           FORCE_COLOR: "1"
         run: |
           make SPHINXOPTS="-W" html

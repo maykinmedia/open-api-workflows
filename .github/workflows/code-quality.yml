@@ -54,10 +54,10 @@ jobs:
           apt-packages: ${{ inputs.apt-packages }}
           python-version: ${{ inputs.python-version }}
           setup-node: false
-          
+
       - name: Run ruff check
         run: ruff check --output-format=github ${{ inputs.ruff-src-pattern }}
-     
+
       - name: Run ruff format
         run: ruff format --diff ${{ inputs.ruff-src-pattern }}
 
@@ -89,6 +89,7 @@ jobs:
         run: src/manage.py makemigrations --check --dry-run
         env:
           DJANGO_SETTINGS_MODULE: ${{ inputs.django-settings-module }}
+          SITE_DOMAIN: localhost:8000
           SECRET_KEY: ${{ inputs.django-settings-module }}
           DB_USER: ${{ inputs.db-user }}
           DB_NAME: ${{ inputs.db-name }}
