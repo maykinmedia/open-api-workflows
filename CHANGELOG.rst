@@ -2,6 +2,11 @@
 Change history
 ==============
 
+v6.3.3 (2026-04-03)
+-------------------
+
+* Add default for ``SITE_DOMAIN`` envvar in jobs that might require this
+
 v6.3.2 (2026-03-23)
 -------------------
 
