@@ -31,23 +31,30 @@ runs:
   using: composite
 
   steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+          persist-credentials: false
     - name: Download generated OAS
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
       with:
         name: ${{ inputs.artifact-name }}
 
     - name: Check for OAS changes
       run: |
-        git diff --exit-code ${{ inputs.schema-path }}
+        git diff --exit-code ${INPUTS_SCHEMA_PATH}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
+      env:
+        INPUTS_SCHEMA_PATH: ${{ inputs.schema-path }}
 
     - name: Write failure markdown
       if: ${{ failure() }}
       run: |
-        first_lineno=$(git diff -U0 ${{ inputs.schema-path }} | grep '^@@' | head -1 | sed -E 's/.*\+([0-9]+).*/\1/')
-        filepath="${{ inputs.working-directory != '' && format('{0}/{1}', inputs.working-directory, inputs.schema-path) || inputs.schema-path }}"
+        first_lineno=$(git diff -U0 ${INPUTS_SCHEMA_PATH} | grep '^@@' | head -1 | sed -E 's/.*\+([0-9]+).*/\1/')
+        filepath=$FILE_PATH
         echo "::error file=$filepath,line=$first_lineno,title=Outdated::There are changes detected in the OpenAPI specification"
         echo 'Please make sure to re-generate the schema locally and commit the changes.' >> $GITHUB_STEP_SUMMARY
       shell: bash
+      env:
+        INPUTS_SCHEMA_PATH: ${{ inputs.schema-path }}
+        FILE_PATH: ${{ inputs.working-directory != '' && format('{0}/{1}', inputs.working-directory, inputs.schema-path) || inputs.schema-path }}

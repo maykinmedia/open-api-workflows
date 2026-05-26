@@ -14,7 +14,7 @@ on:
         type: string
 
       postgres-image:
-        default: 'postgres:latest'
+        default: 'postgres:17'
         type: string
 
       ruff-src-pattern:
@@ -47,19 +47,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up backend environment
-        uses: maykinmedia/setup-django-backend@v1.3
+        uses: maykinmedia/setup-django-backend@a9abe0987130ed667fa09ce177a5ae0bd153aed1 # v1.3
         with:
           apt-packages: ${{ inputs.apt-packages }}
           python-version: ${{ inputs.python-version }}
           setup-node: false
 
       - name: Run ruff check
-        run: ruff check --output-format=github ${{ inputs.ruff-src-pattern }}
+        run: ruff check --output-format=github ${INPUTS_RUFF_SRC_PATTERN}
+        env:
+          INPUTS_RUFF_SRC_PATTERN: ${{ inputs.ruff-src-pattern }}
 
       - name: Run ruff format
-        run: ruff format --diff ${{ inputs.ruff-src-pattern }}
+        run: ruff format --diff ${INPUTS_RUFF_SRC_PATTERN}
+        env:
+          INPUTS_RUFF_SRC_PATTERN: ${{ inputs.ruff-src-pattern }}
 
   migrations:
     name: Check for model changes not present in the migrations
@@ -67,7 +73,7 @@ jobs:
 
     services:
       postgres:
-        image: ${{ inputs.postgres-image }}
+        image: ${{ inputs.postgres-image }}  # zizmor: ignore[unpinned-images]
         env:
           POSTGRES_HOST_AUTH_METHOD: trust
         ports:
@@ -77,9 +83,11 @@ jobs:
           --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Set up backend environment
-        uses: maykinmedia/setup-django-backend@v1.3
+        uses: maykinmedia/setup-django-backend@a9abe0987130ed667fa09ce177a5ae0bd153aed1 # v1.3
         with:
           apt-packages: ${{ inputs.apt-packages }}
           python-version: ${{ inputs.python-version }}

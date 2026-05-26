@@ -41,9 +41,10 @@ jobs:
     if: github.ref_type == 'branch'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Get changed requirements files
         id: files
@@ -91,14 +92,18 @@ jobs:
     if: ${{ inputs.run-docs || inputs.docs-ssl-conf }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Install OS dependencies
         if: ${{ inputs.apt-packages }}
         run: |
           sudo apt-get update
-          sudo apt-get install --yes ${{ inputs.apt-packages }}
+          sudo apt-get install --yes ${INPUTS_APT_PACKAGES}
         shell: bash
-      - uses: actions/setup-python@v4
+        env:
+          INPUTS_APT_PACKAGES: ${{ inputs.apt-packages }}
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: ${{ inputs.python-version }}
           cache: 'pip'
@@ -123,20 +128,29 @@ jobs:
     name: Docker image build
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Determine tag/commit hash
         id: vars
-        uses: maykinmedia/open-api-workflows/actions/extract-version@feature/extract-and-polish-reusable-actions
+        uses: maykinmedia/open-api-workflows/actions/extract-version@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
       - name: Build the Docker image
         run: |
           docker build \
-            --tag ${{ inputs.docker-image-name }}:${{ steps.vars.outputs.version }} \
-            --build-arg COMMIT_HASH=${{ steps.vars.outputs.git_hash }} \
-            --build-arg RELEASE=${{ steps.vars.outputs.version }} \
+            --tag ${INPUTS_DOCKER_IMAGE_NAME}:${STEPS_VARS_OUTPUTS_VERSION} \
+            --build-arg COMMIT_HASH=${STEPS_VARS_OUTPUTS_GIT_HASH} \
+            --build-arg RELEASE=${STEPS_VARS_OUTPUTS_VERSION} \
             .
-      - run: docker image save -o image.tar ${{ inputs.docker-image-name }}:${{ steps.vars.outputs.version }}
+        env:
+          INPUTS_DOCKER_IMAGE_NAME: ${{ inputs.docker-image-name }}
+          STEPS_VARS_OUTPUTS_VERSION: ${{ steps.vars.outputs.version }}
+          STEPS_VARS_OUTPUTS_GIT_HASH: ${{ steps.vars.outputs.git_hash }}
+      - run: docker image save -o image.tar ${INPUTS_DOCKER_IMAGE_NAME}:${STEPS_VARS_OUTPUTS_VERSION}
+        env:
+          INPUTS_DOCKER_IMAGE_NAME: ${{ inputs.docker-image-name }}
+          STEPS_VARS_OUTPUTS_VERSION: ${{ steps.vars.outputs.version }}
       - name: Store image artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: docker-image
           path: image.tar
@@ -151,10 +165,11 @@ jobs:
     steps:
       # So the scanner gets commit meta-information
       - name: Checkout code
-        uses: actions/checkout@v4
-
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Download built image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: docker-image
 

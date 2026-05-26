@@ -32,7 +32,7 @@ v6.3.0 (2026-03-17)
 
     jobs:
     open-api-workflow-code-analysis:
-      uses: maykinmedia/open-api-workflows/.github/workflows/code-analysis.yml@v6
+      uses: maykinmedia/open-api-workflows/.github/workflows/code-analysis.yml@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
       with:
         languages: '["python", "javascript"]'
 
