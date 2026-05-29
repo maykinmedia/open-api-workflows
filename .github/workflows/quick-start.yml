@@ -21,23 +21,32 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Start docker containers
         run: docker compose up -d --build || ( docker compose logs >&2 && exit 1; )
       - name: Wait until uWSGI is running
         run: |
-          until docker compose logs ${{ inputs.service_name }} | grep -q "spawned uWSGI worker"; do
+          until docker compose logs ${INPUTS_SERVICE_NAME} | grep -q "spawned uWSGI worker"; do
             echo "uWSGI not running yet, waiting..."
             sleep 3
           done
+        env:
+          INPUTS_SERVICE_NAME: ${{ inputs.service_name }}
       - name: Load fixtures
         if: ${{ inputs.fixtures != '' }}
-        run: docker compose exec -T ${{ inputs.service_name }} src/manage.py loaddata ${{ inputs.fixtures }}
+        run: docker compose exec -T ${INPUTS_SERVICE_NAME} src/manage.py loaddata ${INPUTS_FIXTURES}
+        env:
+          INPUTS_SERVICE_NAME: ${{ inputs.service_name }}
+          INPUTS_FIXTURES: ${{ inputs.fixtures }}
       - name: Check main page
         run: |
-          curl_status=$(curl -w '%{http_code}' -o /dev/null  -s http://localhost:${{ inputs.port }}/)
+          curl_status=$(curl -w '%{http_code}' -o /dev/null  -s http://localhost:${INPUTS_PORT}/)
           if [[ $curl_status != 200 ]]; then
             printf "Index page responds with ${curl_status} status.\r\n\r\n" >&2
-            curl -i http://localhost:${{ inputs.port }}
+            curl -i http://localhost:${INPUTS_PORT}
             exit 1
           fi
+        env:
+          INPUTS_PORT: ${{ inputs.port }}

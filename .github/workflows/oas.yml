@@ -138,7 +138,7 @@ jobs:
 
     steps:
       - name: Generate
-        uses: maykinmedia/open-api-workflows/actions/oas-generate@v6
+        uses: maykinmedia/open-api-workflows/actions/oas-generate@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
         id: generate
         with:
           python-version: ${{ inputs.python-version }}
@@ -152,7 +152,7 @@ jobs:
           SITE_DOMAIN: localhost:8000
 
       - name: Compare
-        uses: maykinmedia/open-api-workflows/actions/oas-compare@v6
+        uses: maykinmedia/open-api-workflows/actions/oas-compare@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
         with:
           artifact-name: ${{ inputs.oas-artifact-name }}
           schema-path: ${{ inputs.schema-path }}
@@ -165,9 +165,11 @@ jobs:
       - generate-and-compare  # no point in linting something that's not up to date
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Lint
-        uses: maykinmedia/open-api-workflows/actions/oas-lint@v6
+        uses: maykinmedia/open-api-workflows/actions/oas-lint@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}
@@ -182,9 +184,11 @@ jobs:
       - generate-and-compare  # no point in linting something that's not up to date
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: Generate collection
-        uses: maykinmedia/open-api-workflows/actions/oas-to-postman@v6
+        uses: maykinmedia/open-api-workflows/actions/oas-to-postman@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}
@@ -200,9 +204,11 @@ jobs:
       - generate-and-compare  # no point in linting something that's not up to date
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
       - name: SDK generation
-        uses: maykinmedia/open-api-workflows/actions/oas-sdks@v6
+        uses: maykinmedia/open-api-workflows/actions/oas-sdks@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}

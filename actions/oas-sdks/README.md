@@ -16,7 +16,7 @@ jobs:
       schema-path: ${{ steps.generate.outputs.schema-path }}
 
     steps:
-      - uses: maykinmedia/open-api-workflows/actions/oas-generate@v6
+      - uses: maykinmedia/open-api-workflows/actions/oas-generate@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
         id: generate
         with:
           artifact-name: my-project-oas
@@ -28,10 +28,10 @@ jobs:
 
     steps:
       - name: Download generated OAS
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           name: my-project-oas
-      - uses: maykinmedia/open-api-workflows/actions/oas-sdks@v6
+      - uses: maykinmedia/open-api-workflows/actions/oas-sdks@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
         with:
           schema-path: ${{ needs.generate.outputs.schema-path }}
           node-version-file: '.nvmrc'

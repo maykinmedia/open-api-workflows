@@ -54,7 +54,7 @@ runs:
 
   steps:
     - name: Setup Node
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
         node-version: ${{ inputs.node-version }}
         node-version-file: ${{ inputs.node-version-file }}
@@ -62,7 +62,7 @@ runs:
     # Cache this package, because it needs to download stuff from Maven which breaks
     # all the time.
     - name: Cache global npm packages
-      uses: actions/cache@v4
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # v5.0.5
       with:
         path: ~/.npm-global
         key: npm-global-${{ runner.os }}-${{ inputs.openapi-generator-version }}
@@ -81,7 +81,7 @@ runs:
             "generators": {
               "java": {
                 "generatorName": "java",
-                "inputSpec": "${{ inputs.schema-path }}",
+                "inputSpec": "${INPUTS_SCHEMA_PATH}",
                 "output": "#{cwd}/sdks/java",
                 "globalProperty": {
                   "modelTests": false,
@@ -95,7 +95,7 @@ runs:
               },
               ".net": {
                 "generatorName": "csharp",
-                "inputSpec": "${{ inputs.schema-path }}",
+                "inputSpec": "${INPUTS_SCHEMA_PATH}",
                 "output": "#{cwd}/sdks/dotnet",
                 "globalProperty": {
                   "modelTests": false,
@@ -110,7 +110,7 @@ runs:
               },
               "python": {
                 "generatorName": "python",
-                "inputSpec": "${{ inputs.schema-path }}",
+                "inputSpec": "${INPUTS_SCHEMA_PATH}",
                 "output": "#{cwd}/sdks/python",
                 "globalProperty": {
                   "modelTests": false,
@@ -127,21 +127,27 @@ runs:
 
         fi
       shell: bash
+      env:
+        INPUTS_SCHEMA_PATH: ${{ inputs.schema-path }}
 
     - name: Install @openapitools/openapi-generator-cli
       run: |
-        # Set up global path
+        # Set up global npm prefix
         npm config set prefix ~/.npm-global
-        echo "$HOME/.npm-global/bin" >> $GITHUB_PATH
 
         # And install the package
-        npm install -g @openapitools/openapi-generator-cli@${{ inputs.openapi-generator-version }}
+        npm install -g @openapitools/openapi-generator-cli@${INPUTS_OPENAPI_GENERATOR_VERSION}
         # Ensure that the Java package is installed, which saves it in the package directory
-        ~/.npm-global/bin/openapi-generator-cli help
+        /home/runner/.npm-global/bin/openapi-generator-cli help
       shell: bash
+      env:
+        INPUTS_OPENAPI_GENERATOR_VERSION: ${{ inputs.openapi-generator-version }}
 
     - name: Run validator and generator
       run: |
-        openapi-generator-cli --openapitools ${{ inputs.config }} validate --input-spec ${{ inputs.schema-path }}
-        openapi-generator-cli --openapitools ${{ inputs.config }} generate
+        openapi-generator-cli --openapitools ${INPUTS_CONFIG} validate --input-spec ${INPUTS_SCHEMA_PATH}
+        openapi-generator-cli --openapitools ${INPUTS_CONFIG} generate
       shell: bash
+      env:
+        INPUTS_CONFIG: ${{ inputs.config }}
+        INPUTS_SCHEMA_PATH: ${{ inputs.schema-path }}
