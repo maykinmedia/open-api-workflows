@@ -2,6 +2,12 @@
 Change history
 ==============
 
+v6.4.0 (2026-05-29)
+-------------------
+
+* [maykinmedia/open-api-framework#218] Add zizmor action to lint github actions via ``code-analysis.yml``
+* [maykinmedia/open-api-framework#218] Apply zizmor action to open-api-workflows itself and fix the reported errors
+
 v6.3.3 (2026-04-03)
 -------------------
 
