@@ -87,7 +87,7 @@ runs:
     - name: Calculate schema path relative to repository root
       id: calculate-schema-path
       run: |
-        echo $SCHEMA_PATH >> $GITHUB_OUTPUT
+        echo "schema-path=$SCHEMA_PATH" >> $GITHUB_OUTPUT
         touch .gitkeep
       shell: bash
       env:
