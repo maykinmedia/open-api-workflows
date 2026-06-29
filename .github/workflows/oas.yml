@@ -138,7 +138,7 @@ jobs:
 
     steps:
       - name: Generate
-        uses: maykinmedia/open-api-workflows/actions/oas-generate@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
+        uses: maykinmedia/open-api-workflows/actions/oas-generate@7671027789b7b0706f3968346d85eed191d9728a # pre-v6.4.1
         id: generate
         with:
           python-version: ${{ inputs.python-version }}
@@ -152,7 +152,7 @@ jobs:
           SITE_DOMAIN: localhost:8000
 
       - name: Compare
-        uses: maykinmedia/open-api-workflows/actions/oas-compare@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
+        uses: maykinmedia/open-api-workflows/actions/oas-compare@7671027789b7b0706f3968346d85eed191d9728a # pre-v6.4.1
         with:
           artifact-name: ${{ inputs.oas-artifact-name }}
           schema-path: ${{ inputs.schema-path }}
@@ -169,7 +169,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Lint
-        uses: maykinmedia/open-api-workflows/actions/oas-lint@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
+        uses: maykinmedia/open-api-workflows/actions/oas-lint@7671027789b7b0706f3968346d85eed191d9728a # pre-v6.4.1
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}
@@ -188,7 +188,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Generate collection
-        uses: maykinmedia/open-api-workflows/actions/oas-to-postman@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
+        uses: maykinmedia/open-api-workflows/actions/oas-to-postman@7671027789b7b0706f3968346d85eed191d9728a # pre-v6.4.1
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}
@@ -208,7 +208,7 @@ jobs:
         with:
           persist-credentials: false
       - name: SDK generation
-        uses: maykinmedia/open-api-workflows/actions/oas-sdks@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
+        uses: maykinmedia/open-api-workflows/actions/oas-sdks@7671027789b7b0706f3968346d85eed191d9728a # pre-v6.4.1
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}
