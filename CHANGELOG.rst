@@ -2,6 +2,15 @@
 Change history
 ==============
 
+v6.4.1 (2026-06-29)
+-------------------
+
+* [maykinmedia/open-api-framework#218] Pin codeql actions to full commit SHA as well
+  otherwise the increased github actions security policy will block them entirely
+* Fix incorrect write to github output for OAS generate action
+* Ensure correct path for openapi-generator-cli is used
+* Pin actions from open-api-workflows in oas.yml to commit SHA for pre-v6.4.1
+
 v6.4.0 (2026-05-29)
 -------------------
 
