@@ -139,6 +139,7 @@ runs:
         npm install -g @openapitools/openapi-generator-cli@${INPUTS_OPENAPI_GENERATOR_VERSION}
         # Ensure that the Java package is installed, which saves it in the package directory
         /home/runner/.npm-global/bin/openapi-generator-cli help
+        echo "$HOME/.npm-global/bin" >> $GITHUB_PATH
       shell: bash
       env:
         INPUTS_OPENAPI_GENERATOR_VERSION: ${{ inputs.openapi-generator-version }}
