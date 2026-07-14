@@ -4,43 +4,8 @@ name: open-api-workflow code-analysis
 
 on:
   workflow_call:
-    inputs:
-      languages:
-        description: "JSON list of languages CodeQL should analyze"
-        required: false
-        type: string
-        default: '["python","javascript","actions"]'
 
 jobs:
-  analyze:
-    name: Analyze
-    runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ${{ fromJSON(inputs.languages) }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          persist-credentials: false
-
-      # codeql-action is intentionally ref-pinned rather than hash-pinned.
-      # Its moving tag (@v4) automatically pulls in updated query packs and
-      # detection rules; pinning to a SHA would freeze those at a point in time.
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
-        with:
-          languages: ${{ matrix.language }}
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
-
   zizmor:
     name: GitHub Actions Security Analysis with zizmor 🌈
     runs-on: ubuntu-latest
