@@ -1,9 +1,9 @@
 ---
 
-name: Lint the specified OpenAPI spec using spectral.
+name: Lint the specified OpenAPI spec using vacuum.
 
 description: >2
-  Installs and runs the spectral linter on the specified OpenAPI specification(s).
+  Installs and runs the vacuum linter on the specified OpenAPI specification(s).
 
 
   You can provide the API specification in a number of ways: checkout the repository
@@ -17,29 +17,26 @@ inputs:
     description: Path or glob (relative to the root of the repo) of specifications to lint.
     default: 'src/openapi.yaml'
 
-  node-version-file:
+  vacuum-version:
     type: string
     required: false
     description: >2
-      Passed down to actions/setup-node, so the same rules apply. Alternatively, use
-      `node-version` instead.
-    default: ''
+      The version of vacuum to install. It's recommended to pin this for stability reasons.
+    default: '0.30.0'
 
-  node-version:
+  vacuum-version-checksum:
     type: string
     required: false
     description: >2
-      Passed down to actions/setup-node, so the same rules apply. Alternatively, use
-      `node-version-file` instead.
-    default: ''
+      The sha256 checksum that should match for the given `vacuum-version`
+    default: '817b6bd71051c2b543891b4e26692404bfab9c79b29393734bdd8c6b9356c2e4'  # checksum for 0.30.0
 
-  spectral-version:
-    type: string
+  vacuum-hard-mode:
+    type: boolean
     required: false
     description: >2
-      The NPM package version number of spectral-cli to install. It's recommended
-      to pin this for stability reasons.
-    default: '^6.15.0'
+      Whether or not the --hard-mode flag should be enabled for vacuum linting
+    default: false
 
   ruleset:
     type: string
@@ -53,12 +50,6 @@ runs:
   using: composite
 
   steps:
-    - name: Setup Node
-      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
-      with:
-        node-version: ${{ inputs.node-version }}
-        node-version-file: ${{ inputs.node-version-file }}
-
     - name: Set up (default) ruleset
       run: |
         if [ ! -f .spectral.yaml ]; then
@@ -67,12 +58,27 @@ runs:
         fi
       shell: bash
 
-    - name: Install and run Spectral linter
+    - name: Install Vacuum from prebuilt binary
       run: |
-        npm install -g @stoplight/spectral-cli@${INPUTS_SPECTRAL_VERSION}
-        spectral lint ${INPUTS_SCHEMA_PATH} --ruleset ${INPUTS_RULESET}
+        wget https://github.com/daveshanley/vacuum/releases/download/v${INPUTS_VACUUM_VERSION}/vacuum_${INPUTS_VACUUM_VERSION}_linux_x86_64.tar.gz
+        echo "${INPUTS_VACUUM_VERSION_CHECKSUM} vacuum_${INPUTS_VACUUM_VERSION}_linux_x86_64.tar.gz" | sha256sum --check
+        tar -xzf vacuum_${INPUTS_VACUUM_VERSION}_linux_x86_64.tar.gz
+        sudo mv vacuum /usr/local/bin/
       shell: bash
       env:
-        INPUTS_SPECTRAL_VERSION: ${{ inputs.spectral-version }}
+        INPUTS_VACUUM_VERSION: ${{ inputs.vacuum-version }}
+        INPUTS_VACUUM_VERSION_CHECKSUM: ${{ inputs.vacuum-version-checksum }}
+
+    - name: Run Vacuum linter
+      run: |
+        echo "### Vacuum Lint Results" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        vacuum lint ${INPUTS_SCHEMA_PATH} \
+          --ruleset ${INPUTS_RULESET} ${{ inputs.vacuum-hard-mode == 'true' && '--hard-mode' || '' }} \
+          --details --errors \
+          >> $GITHUB_STEP_SUMMARY 2>&1
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+      shell: bash
+      env:
         INPUTS_SCHEMA_PATH: ${{ inputs.schema-path }}
         INPUTS_RULESET: ${{ inputs.ruleset }}

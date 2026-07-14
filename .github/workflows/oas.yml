@@ -79,13 +79,26 @@ on:
           `node-version-file` instead.
         default: ''
 
-      spectral-version:
+      vacuum-version:
         type: string
         required: false
         description: >2
-          The NPM package version number of spectral-cli to install. It's recommended
-          to pin this for stability reasons.
-        default: '^6.15.0'
+          The version of vacuum to install. It's recommended to pin this for stability reasons.
+        default: '0.30.0'
+
+      vacuum-version-checksum:
+        type: string
+        required: false
+        description: >2
+          The sha256 checksum that should match for the given `vacuum-version`
+        default: '2dac5adb73fe190e2657108f2ab408fafbc0fe5323b33825b03a6537de0207c8'  # checksum for 0.30.0
+
+      vacuum-hard-mode:
+        type: boolean
+        required: false
+        description: >2
+          Whether or not the --hard-mode flag should be enabled for vacuum linting
+        default: false
 
       spectral-ruleset:
         type: string
@@ -172,9 +185,9 @@ jobs:
         uses: maykinmedia/open-api-workflows/actions/oas-lint@cca0942e0fac0e83da00e8d3b9bbf540a9b06c7e # pre-v7.0.0
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
-          node-version-file: ${{ inputs.node-version-file }}
-          node-version: ${{ inputs.node-version }}
-          spectral-version: ${{ inputs.spectral-version }}
+          vacuum-version: ${{ inputs.vacuum-version }}
+          vacuum-version-checksum: ${{ inputs.vacuum-version-checksum }}
+          vacuum-hard-mode: ${{ inputs.vacuum-hard-mode }}
           ruleset: ${{ inputs.spectral-ruleset }}
 
   postman-collection:

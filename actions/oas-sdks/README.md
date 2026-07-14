@@ -35,7 +35,7 @@ jobs:
         with:
           schema-path: ${{ needs.generate.outputs.schema-path }}
           node-version-file: '.nvmrc'
-          spectral-version: '^6.15.0'
+          vacuum-version: '0.30.0'
 ```
 
 Note that if you cleverly combine all the actions that you don't even need to check out
