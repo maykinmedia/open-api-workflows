@@ -91,7 +91,7 @@ on:
         required: false
         description: >2
           The sha256 checksum that should match for the given `vacuum-version`
-        default: '2dac5adb73fe190e2657108f2ab408fafbc0fe5323b33825b03a6537de0207c8'  # checksum for 0.30.0
+        default: '817b6bd71051c2b543891b4e26692404bfab9c79b29393734bdd8c6b9356c2e4'  # checksum for 0.30.0
 
       vacuum-hard-mode:
         type: boolean
@@ -182,7 +182,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Lint
-        uses: maykinmedia/open-api-workflows/actions/oas-lint@cca0942e0fac0e83da00e8d3b9bbf540a9b06c7e # pre-v7.0.0
+        uses: maykinmedia/open-api-workflows/actions/oas-lint@02245b807e6b798d4a1716199b6b28e2f7da8bc8 # pre-v7.0.0
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           vacuum-version: ${{ inputs.vacuum-version }}
