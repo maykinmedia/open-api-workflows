@@ -138,7 +138,7 @@ jobs:
 
     steps:
       - name: Generate
-        uses: maykinmedia/open-api-workflows/actions/oas-generate@7671027789b7b0706f3968346d85eed191d9728a # pre-v6.4.1
+        uses: maykinmedia/open-api-workflows/actions/oas-generate@cca0942e0fac0e83da00e8d3b9bbf540a9b06c7e # pre-v7.0.0
         id: generate
         with:
           python-version: ${{ inputs.python-version }}
@@ -152,7 +152,7 @@ jobs:
           SITE_DOMAIN: localhost:8000
 
       - name: Compare
-        uses: maykinmedia/open-api-workflows/actions/oas-compare@7671027789b7b0706f3968346d85eed191d9728a # pre-v6.4.1
+        uses: maykinmedia/open-api-workflows/actions/oas-compare@cca0942e0fac0e83da00e8d3b9bbf540a9b06c7e # pre-v7.0.0
         with:
           artifact-name: ${{ inputs.oas-artifact-name }}
           schema-path: ${{ inputs.schema-path }}
@@ -165,11 +165,11 @@ jobs:
       - generate-and-compare  # no point in linting something that's not up to date
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: Lint
-        uses: maykinmedia/open-api-workflows/actions/oas-lint@7671027789b7b0706f3968346d85eed191d9728a # pre-v6.4.1
+        uses: maykinmedia/open-api-workflows/actions/oas-lint@cca0942e0fac0e83da00e8d3b9bbf540a9b06c7e # pre-v7.0.0
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}
@@ -184,11 +184,11 @@ jobs:
       - generate-and-compare  # no point in linting something that's not up to date
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: Generate collection
-        uses: maykinmedia/open-api-workflows/actions/oas-to-postman@7671027789b7b0706f3968346d85eed191d9728a # pre-v6.4.1
+        uses: maykinmedia/open-api-workflows/actions/oas-to-postman@cca0942e0fac0e83da00e8d3b9bbf540a9b06c7e # pre-v7.0.0
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}
@@ -204,11 +204,11 @@ jobs:
       - generate-and-compare  # no point in linting something that's not up to date
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: SDK generation
-        uses: maykinmedia/open-api-workflows/actions/oas-sdks@7671027789b7b0706f3968346d85eed191d9728a # pre-v6.4.1
+        uses: maykinmedia/open-api-workflows/actions/oas-sdks@cca0942e0fac0e83da00e8d3b9bbf540a9b06c7e # pre-v7.0.0
         with:
           schema-path: ${{ needs.generate-and-compare.outputs.schema-path }}
           node-version-file: ${{ inputs.node-version-file }}

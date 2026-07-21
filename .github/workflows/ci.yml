@@ -41,7 +41,7 @@ jobs:
     if: github.ref_type == 'branch'
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -92,7 +92,7 @@ jobs:
     if: ${{ inputs.run-docs || inputs.docs-ssl-conf }}
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: Install OS dependencies
@@ -103,7 +103,7 @@ jobs:
         shell: bash
         env:
           INPUTS_APT_PACKAGES: ${{ inputs.apt-packages }}
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
           python-version: ${{ inputs.python-version }}
           cache: 'pip'
@@ -128,12 +128,12 @@ jobs:
     name: Docker image build
 
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: Determine tag/commit hash
         id: vars
-        uses: maykinmedia/open-api-workflows/actions/extract-version@f3918649c67da9bc96991ce64cdbb760b9fed28e  # v6.3.3
+        uses: maykinmedia/open-api-workflows/actions/extract-version@0a5525c13f8eea10be40c8eaee5e535ea3a10721  # v6.4.1
       - name: Build the Docker image
         run: |
           docker build \
@@ -165,7 +165,7 @@ jobs:
     steps:
       # So the scanner gets commit meta-information
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
       - name: Download built image
@@ -175,7 +175,7 @@ jobs:
 
       - name: Scan image with Trivy
         # Pinned to sha for v0.69.3
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
         with:
           input: ${{ github.workspace }}/image.tar  # from download-artifact
           format: 'sarif'
@@ -183,6 +183,6 @@ jobs:
           ignore-unfixed: true
 
       - name: Upload results to GH Security tab
-        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4
+        uses: github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4
         with:
           sarif_file: 'trivy-results-docker.sarif'
