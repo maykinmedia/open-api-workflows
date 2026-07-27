@@ -2,6 +2,29 @@
 Change history
 ==============
 
+v7.0.0 (2026-07-27)
+-------------------
+
+**Breaking changes**
+
+* [#60] Replace spectral-cli with go-based vacuum for OAS lint action
+
+**New features**
+
+* Add workflow ``dockerhub-description.yml`` to generate and update Docker Hub description
+* [#64] Add action to generate a README file used as the Docker Hub description from a constants file
+* [#64] Add workflow ``.github/workflows/dockerhub-description.yml`` to update the Docker Hub description
+
+**Maintenance**
+
+* Upgrade pins for several actions
+
+  * Pin own actions/workflows to pre-v7.0.0 commit
+  * ``actions/checkout`` to v7.0.1
+  * ``actions/setup-python`` to v7.0.0
+  * ``github/codeql-action/upload-sarif`` to v4.37.3
+  * ``zizmorcore/zizmor-action`` to v0.6.1
+
 v6.4.1 (2026-06-29)
 -------------------
 
