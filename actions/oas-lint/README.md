@@ -1,6 +1,6 @@
 # Lint OpenAPI specification
 
-Run the [spectral](https://www.npmjs.com/package/@stoplight/spectral-cli) linter on the
+Run the [vacuum](https://github.com/daveshanley/vacuum) linter on the
 specified OpenAPI specification.
 
 This action deliberately does not use the existing github action, as it appears to not
@@ -36,7 +36,7 @@ jobs:
         with:
           schema-path: ${{ needs.generate.outputs.schema-path }}
           node-version-file: '.nvmrc'
-          spectral-version: '^6.15.0'
+          vacuum-version: '0.30.0'
 ```
 
 Note that if you cleverly combine all the actions that you don't even need to check out
