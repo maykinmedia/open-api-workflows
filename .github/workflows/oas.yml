@@ -100,6 +100,13 @@ on:
           Whether or not the --hard-mode flag should be enabled for vacuum linting
         default: false
 
+      vacuum-custom-functions:
+        type: string
+        required: false
+        description: >2
+          The name of a directory that contains custom function that Vacuum can use
+        default: ''
+
       spectral-ruleset:
         type: string
         required: false
@@ -188,6 +195,7 @@ jobs:
           vacuum-version: ${{ inputs.vacuum-version }}
           vacuum-version-checksum: ${{ inputs.vacuum-version-checksum }}
           vacuum-hard-mode: ${{ inputs.vacuum-hard-mode }}
+          vacuum-custom-functions: ${{ inputs.vacuum-custom-functions }}
           ruleset: ${{ inputs.spectral-ruleset }}
 
   postman-collection:

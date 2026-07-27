@@ -38,6 +38,13 @@ inputs:
       Whether or not the --hard-mode flag should be enabled for vacuum linting
     default: false
 
+  vacuum-custom-functions:
+    type: string
+    required: false
+    description: >2
+      The name of a directory that contains custom function that Vacuum can use
+    default: ''
+
   ruleset:
     type: string
     required: false
@@ -75,6 +82,7 @@ runs:
         echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
         vacuum lint ${INPUTS_SCHEMA_PATH} \
           --ruleset ${INPUTS_RULESET} ${{ inputs.vacuum-hard-mode == 'true' && '--hard-mode' || '' }} \
+          $( [ -n "${INPUTS_VACUUM_CUSTOM_FUNCTIONS}" ] && echo "--functions ${INPUTS_VACUUM_CUSTOM_FUNCTIONS}" ) \
           --details --errors \
           >> $GITHUB_STEP_SUMMARY 2>&1
         echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
@@ -82,3 +90,4 @@ runs:
       env:
         INPUTS_SCHEMA_PATH: ${{ inputs.schema-path }}
         INPUTS_RULESET: ${{ inputs.ruleset }}
+        INPUTS_VACUUM_CUSTOM_FUNCTIONS: ${{ inputs.vacuum-custom-functions }}
