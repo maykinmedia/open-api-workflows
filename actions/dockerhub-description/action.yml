@@ -1,0 +1,25 @@
+name: Generate Docker Hub description
+description: 'Generates the README file used as the Docker Hub description from a constants file'
+
+inputs:
+  config-file:
+    description: Path to the JSON configuration file containing project constants
+  output-file:
+    description: Path to the output file where the generated description will be written
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+      with:
+        enable-cache: false
+
+    - name: Run generator script
+      shell: bash
+      run: |
+        uv run --no-project "${{ github.action_path }}/generate_dockerhub_description.py" \
+          --config-file="${INPUTS_CONFIG_FILE}" \
+          --output-file="${INPUTS_OUTPUT_FILE}"
+      env:
+        INPUTS_CONFIG_FILE: ${{ inputs.config-file }}
+        INPUTS_OUTPUT_FILE: ${{ inputs.output-file }}
