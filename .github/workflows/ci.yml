@@ -133,7 +133,7 @@ jobs:
           persist-credentials: false
       - name: Determine tag/commit hash
         id: vars
-        uses: maykinmedia/open-api-workflows/actions/extract-version@0a5525c13f8eea10be40c8eaee5e535ea3a10721  # v6.4.1
+        uses: maykinmedia/open-api-workflows/actions/extract-version@da2c60772d2e3580ccae85352f3d01bfc5ff1229  # pre-v7.0.0
       - name: Build the Docker image
         run: |
           docker build \
