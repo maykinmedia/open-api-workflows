@@ -1,0 +1,50 @@
+# {{ project_name }} - Official Docker image
+
+## Quick reference
+
+- **Documentation**: {{ project_documentation }}
+- **Maintained by**: [The {{ project_name }} Maintainers](https://github.com/{{ github_org }})
+- **Where to get help**: [The {{ project_name }} Github](https://github.com/{{ github_org }}/{{ github_repo }}/issues)
+
+## Supported tags and respective `Dockerfile` links
+
+{% for supported_tag in supported_tags %}{% if not supported_tag.has_extensions -%}
+- [`{{ supported_tag.tag }}`]({{ supported_tag.dockerfile_url }})
+{% endif %}{% endfor %}
+
+## Quick reference (cont.)
+
+- **Supported architectures**: `amd64`
+
+## What is {{ project_name }}?
+
+{{ project_description }}
+
+{% if project_docker_usage_url %}
+## Usage
+
+See: {{ project_docker_usage_url }}
+{% endif %}
+{% if extensions %}
+## Extensions
+
+The {{ project_name }} maintainers also maintain a number of official extensions, which are
+distributed in a separate build, including all available extensions _at the time_.
+
+### Supported tags with extensions
+
+{% for supported_tag in supported_tags %}{% if supported_tag.has_extensions -%}
+- [`{{ supported_tag.tag }}`]({{ supported_tag.dockerfile_url }})
+{% endif %}{% endfor %}
+
+**Included extensions**
+
+The extensions bundled in the `latest` build are:
+
+{% for extension in extensions -%}
+- [{{ extension.name }}](https://github.com/{{ extension.repository }})
+{% endfor %}
+
+Note that _versioned_ tags may include fewer extensions than `latest`, depending on
+which extensions were available during that release cycle.
+{% endif %}
