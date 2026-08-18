@@ -45,7 +45,7 @@ jobs:
 
       - name: Determine tag/commit hash
         id: vars
-        uses: maykinmedia/open-api-workflows/actions/extract-version@da2c60772d2e3580ccae85352f3d01bfc5ff1229  # pre-v7.0.0
+        uses: maykinmedia/open-api-workflows/actions/extract-version@d041ff2ab7ef3c17474e97eb12dd16dadcd0e52d  # pre-v7.0.0
 
       - name: Load image
         run: |

@@ -133,7 +133,7 @@ jobs:
           persist-credentials: false
       - name: Determine tag/commit hash
         id: vars
-        uses: maykinmedia/open-api-workflows/actions/extract-version@da2c60772d2e3580ccae85352f3d01bfc5ff1229  # pre-v7.0.0
+        uses: maykinmedia/open-api-workflows/actions/extract-version@d041ff2ab7ef3c17474e97eb12dd16dadcd0e52d  # pre-v7.0.0
       - name: Build the Docker image
         run: |
           docker build \
@@ -183,6 +183,6 @@ jobs:
           ignore-unfixed: true
 
       - name: Upload results to GH Security tab
-        uses: github/codeql-action/upload-sarif@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4.37.3
+        uses: github/codeql-action/upload-sarif@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         with:
           sarif_file: 'trivy-results-docker.sarif'
