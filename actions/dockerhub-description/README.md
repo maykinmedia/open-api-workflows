@@ -12,9 +12,11 @@ This composite action generates a Docker Hub repository description from a JSON 
   with:
     config-file: './docker/ci/config.json'
     output-file: './docker/ci/README.md'
+    python-version: '3.12'
 ```
 
 - `config-file`: Path in your project to the JSON file with project configurations. Default: `./docker/ci/config.json`.
 - `output-file`: Path in your project where the rendered README will be written. Default: `./docker/ci/README.md`.
+- `python-version`: Python version used to run the generator script.
 
 Both paths are resolved relative to your project's repository, not to `open-api-workflows`, make sure `actions/checkout` runs before this step and that `config-file` exists at that path.

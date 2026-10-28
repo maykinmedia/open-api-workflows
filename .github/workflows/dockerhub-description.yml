@@ -7,6 +7,11 @@ on:
         description: Name of the Docker Hub repository
         required: true
         type: string
+      python-version:
+        description: Python version used to run the generator script
+        required: false
+        default: '3.12'
+        type: string
       config-file:
         description: Path to the JSON configuration file containing project constants
         required: false
@@ -36,10 +41,11 @@ jobs:
           persist-credentials: false
 
       - name: Generate README
-        uses: maykinmedia/open-api-workflows/actions/dockerhub-description@ec61297c42c9e57db276e2731dca48b168679423
+        uses: maykinmedia/open-api-workflows/actions/dockerhub-description@b5833d85a97404628dac5dc65a01b23822c2aa51
         with:
           config-file: ${{ inputs.config-file }}
           output-file: ${{ inputs.output-file }}
+          python-version: ${{ inputs.python-version }}
 
       - name: Update Docker Hub description
         uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5.0.0

@@ -2,6 +2,13 @@
 Change history
 ==============
 
+v7.0.1 (2026-10-28)
+-------------------
+
+**Maintenance**
+
+* Add ``python-version`` for dockerhub-description action and workflow
+
 v7.0.0 (2026-07-27)
 -------------------
 
