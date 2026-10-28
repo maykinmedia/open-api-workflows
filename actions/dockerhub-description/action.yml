@@ -6,6 +6,10 @@ inputs:
     description: Path to the JSON configuration file containing project constants
   output-file:
     description: Path to the output file where the generated description will be written
+  python-version:
+    description: Python version used to run the generator script
+    required: false
+    default: '3.12'
 
 runs:
   using: 'composite'
@@ -17,9 +21,11 @@ runs:
     - name: Run generator script
       shell: bash
       run: |
-        uv run --no-project "${{ github.action_path }}/generate_dockerhub_description.py" \
+        uv run --no-project --python "${INPUTS_PYTHON_VERSION}" \
+          "${{ github.action_path }}/generate_dockerhub_description.py" \
           --config-file="${INPUTS_CONFIG_FILE}" \
           --output-file="${INPUTS_OUTPUT_FILE}"
       env:
         INPUTS_CONFIG_FILE: ${{ inputs.config-file }}
         INPUTS_OUTPUT_FILE: ${{ inputs.output-file }}
+        INPUTS_PYTHON_VERSION: ${{ inputs.python-version }}
