@@ -16,4 +16,4 @@ permissions:
 
 jobs:
   open-api-workflow-code-analysis:
-    uses: maykinmedia/open-api-workflows/.github/workflows/code-analysis.yml@da2c60772d2e3580ccae85352f3d01bfc5ff1229  # pre-v7.0.0
+    uses: maykinmedia/open-api-workflows/.github/workflows/code-analysis.yml@568c5c7a7f66aac120ead42f96f100409f78dc09  # pre-v7.0.0
